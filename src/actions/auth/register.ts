@@ -2,6 +2,7 @@
 
 import {pb} from "@/lib/api";
 import {ClientResponseError} from "pocketbase";
+import {cookies} from "next/headers";
 
 export type RegisterState = {
     name: string;
@@ -37,13 +38,19 @@ async function registerAction(currentState: RegisterState, formData: FormData) {
             email,
             password,
             passwordConfirm: confirmPassword,
-            role,
+            role: role === "admin" ? "student" : role,
         };
 
         const record = await client.collection("users").create(userData);
         await client.collection("users").authWithPassword(email, password);
 
         if (record && client.authStore.isValid) {
+            const token = client.authStore.exportToCookie({
+                httpOnly: false,
+                secure: process.env.NODE_ENV === "production"
+            });
+            const cookieStore = await cookies();
+            cookieStore.set('pb_auth', token);
             return { ...currentState, error: "", isLoading: false, isRegistered: true };
         } else {
             return {
