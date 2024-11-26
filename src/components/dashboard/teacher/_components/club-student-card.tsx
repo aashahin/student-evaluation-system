@@ -1,10 +1,10 @@
 "use client";
 
 import React, {useState} from "react";
-import {Award, Book, Clock, FileText, Loader, Pencil, Star, TrendingUp, Users} from "lucide-react";
+import {Award, Book, Clock, FileText, Loader, Star, TrendingUp, Users} from "lucide-react";
 import {ReadingClub, StudentEvaluation, User} from "@/types/api";
 import {Button} from "@/components/ui/button";
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 
 type ClubStudentCardProps = {
     selectedClub: ReadingClub,
@@ -136,7 +136,7 @@ const ClubStudentCard = (
                                                         onClick={() => setOpenChallenges(true)}
                                                         variant="link"
                                                     >
-                                                        التحديات
+                                                        عرض
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent>
