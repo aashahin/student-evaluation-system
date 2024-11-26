@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, {useEffect, useState} from "react";
@@ -31,8 +30,29 @@ export default function Clubs() {
     const [gradeLevels, setGradeLevels] = useState<GradeLevel[]>([]);
     const [clubMemberCounts, setClubMemberCounts] = useState<Record<string, number>>({});
     const [clubMembers, setClubMembers] = useState<Record<string, User[]>>({});
-
     const client = pb();
+
+    useEffect(() => {
+        fetchClubs().then(() => fetchGradeLevels());
+    }, []);
+
+    const fetchClubMemberCounts = async (clubIds: string[]) => {
+        try {
+            const counts: Record<string, number> = {};
+            for (const clubId of clubIds) {
+                const records = await client.collection('reading_club_members').getFullList({
+                    filter: `club_id = "${clubId}"`,
+                    requestKey: Math.random().toString(),
+                    expand: 'user_id',
+                });
+                counts[clubId] = records.length;
+                setClubMembers(prevClubMembers => ({...prevClubMembers, [clubId]: records.map(item => item.expand?.user_id)}));
+            }
+            setClubMemberCounts(counts);
+        } catch (error) {
+            console.error('Error fetching member counts:', error);
+        }
+    };
 
     const fetchGradeLevels = async () => {
         try {
@@ -61,28 +81,6 @@ export default function Clubs() {
             console.error('Error fetching reading clubs:', error);
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchClubs().then(() => fetchGradeLevels());
-    }, [fetchClubs, fetchGradeLevels]);
-
-    const fetchClubMemberCounts = async (clubIds: string[]) => {
-        try {
-            const counts: Record<string, number> = {};
-            for (const clubId of clubIds) {
-                const records = await client.collection('reading_club_members').getFullList({
-                    filter: `club_id = "${clubId}"`,
-                    requestKey: Math.random().toString(),
-                    expand: 'user_id',
-                });
-                counts[clubId] = records.length;
-                setClubMembers(prevClubMembers => ({...prevClubMembers, [clubId]: records.map(item => item.expand?.user_id)}));
-            }
-            setClubMemberCounts(counts);
-        } catch (error) {
-            console.error('Error fetching member counts:', error);
         }
     };
 
