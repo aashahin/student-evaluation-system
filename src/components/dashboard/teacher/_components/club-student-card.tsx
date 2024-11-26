@@ -1,8 +1,10 @@
 "use client";
 
 import React, {useState} from "react";
-import {Award, Book, Clock, FileText, Loader, Star, TrendingUp, Users} from "lucide-react";
+import {Award, Book, Clock, FileText, Loader, Pencil, Star, TrendingUp, Users} from "lucide-react";
 import {ReadingClub, StudentEvaluation, User} from "@/types/api";
+import {Button} from "@/components/ui/button";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 
 type ClubStudentCardProps = {
     selectedClub: ReadingClub,
@@ -26,6 +28,7 @@ const ClubStudentCard = (
         clubMembers
     }: ClubStudentCardProps) => {
     const [activeTab, setActiveTab] = useState('evaluations');
+    const [openChallenges, setOpenChallenges] = useState(false);
 
     const renderStatCard = (icon: React.ReactNode, label: string, value: string | number, color: string) => (
         <div
@@ -71,6 +74,10 @@ const ClubStudentCard = (
                                         <th scope="col"
                                             className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
                                             سرعة القراءة
+                                        </th>
+                                        <th scope="col"
+                                            className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
+                                            التحديات
                                         </th>
                                     </>
                                 ) : (
@@ -118,6 +125,28 @@ const ClubStudentCard = (
                                                 {evaluation.reading_speed === "slow" ? "سريع" :
                                                     evaluation.reading_speed === "medium" ? "متوسط" : "بطيء"}
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                            <Dialog
+                                                open={openChallenges}
+                                                onOpenChange={setOpenChallenges}
+                                            >
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        onClick={() => setOpenChallenges(true)}
+                                                        variant="link"
+                                                    >
+                                                        التحديات
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogTitle>التحديات</DialogTitle>
+                                                    <div className="mt-2 border-t border-gray-300"/>
+                                                    <p
+                                                        dangerouslySetInnerHTML={{__html: evaluation.challenges}}
+                                                    />
+                                                </DialogContent>
+                                            </Dialog>
                                         </td>
                                     </tr>
                                 ))
