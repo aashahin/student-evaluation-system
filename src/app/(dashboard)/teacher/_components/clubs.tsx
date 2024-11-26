@@ -1,10 +1,10 @@
 "use client";
 
-import {Award, Book, Clock, FileText, Loader, Plus, Search, Star, TrendingUp, Users} from "lucide-react";
+import {Award, Book, Clock, FileText, Loader, Search, Star, TrendingUp, Users} from "lucide-react";
 import React, {useEffect, useState} from "react";
-import {ReadingClub, StudentEvaluation} from "@/types/api";
+import {GradeLevel, ReadingClub, StudentEvaluation} from "@/types/api";
 import {pb} from "@/lib/api";
-import {Button} from "@/components/ui/button";
+import CreateClubDialog from "@/app/(dashboard)/_components/create-club";
 
 export default function Clubs() {
     const [readingClubs, setReadingClubs] = useState<ReadingClub[]>([]);
@@ -13,11 +13,25 @@ export default function Clubs() {
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingEvaluations, setIsLoadingEvaluations] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [gradeLevels, setGradeLevels] = useState<GradeLevel[]>([]);
+
     const client = pb();
 
     useEffect(() => {
-        fetchClubs().then(() => setIsLoading(false));
+        fetchClubs();
+        fetchGradeLevels();
     }, []);
+
+    const fetchGradeLevels = async () => {
+        try {
+            const records = await client.collection('grade_levels').getFullList<GradeLevel>({
+                requestKey: Math.random().toString(),
+            });
+            setGradeLevels(records);
+        } catch (error) {
+            console.error('Error fetching grade levels:', error);
+        }
+    };
 
     const fetchClubs = async () => {
         setIsLoading(true);
@@ -42,6 +56,7 @@ export default function Clubs() {
             const records = await client.collection('self_evaluations').getFullList<StudentEvaluation>({
                 filter: `club_id = "${clubId}"`,
                 expand: 'student_id,book_id',
+                requestKey: Math.random().toString(),
             });
             setEvaluations(records);
         } catch (error) {
@@ -69,21 +84,21 @@ export default function Clubs() {
                         <Book className="text-blue-600"/>
                         نوادي القراءة
                     </h2>
-                    <Button>
-                        <Plus size={18}/>
-                        إنشاء نادي جديد
-                    </Button>
+                    <CreateClubDialog
+                        gradeLevels={gradeLevels}
+                        onClubCreated={fetchClubs}
+                    />
                 </div>
 
                 {/* Search Bar */}
                 <div className="relative mb-6">
-                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                    <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"/>
                     <input
                         type="text"
                         placeholder="البحث في النوادي..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                        className="w-full ps-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
                     />
                 </div>
 
