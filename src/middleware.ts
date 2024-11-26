@@ -18,15 +18,7 @@ export async function middleware(request: NextRequest) {
 
     try {
         const client = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_API_URL);
-        const cookie = { pb_auth: authCookie?.value || '' }
-        let encodedCookie = ''
-        for (const [key, value] of Object.entries(cookie)) {
-            encodedCookie += `${encodeURIComponent(key)}=${encodeURIComponent(
-                value,
-            )}; `
-        }
-        client.authStore.loadFromCookie(encodedCookie.trimEnd());
-
+        client.authStore.loadFromCookie(`${authCookie.name}=${authCookie.value}`);
         if (client.authStore.isValid) {
             await client.collection("users").authRefresh();
             return response;
