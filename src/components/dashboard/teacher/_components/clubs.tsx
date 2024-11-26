@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, {useEffect, useState} from "react";
 import {Book, Loader, Search, Users} from "lucide-react";
-import {GradeLevel, ReadingClub, StudentEvaluation, User} from "@/types/api";
+import {GradeLevel, ReadingClub, Survey, User} from "@/types/api";
 import {pb} from "@/lib/api";
 import CreateClubDialog from "@/components/dashboard/_components/create-club";
 import {
@@ -23,7 +24,7 @@ import ClubStudentCard from "@/components/dashboard/teacher/_components/club-stu
 export default function Clubs() {
     const [readingClubs, setReadingClubs] = useState<ReadingClub[]>([]);
     const [selectedClub, setSelectedClub] = useState<ReadingClub | null>(null);
-    const [evaluations, setEvaluations] = useState<StudentEvaluation[]>([]);
+    const [evaluations, setEvaluations] = useState<Survey[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingEvaluations, setIsLoadingEvaluations] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -32,29 +33,6 @@ export default function Clubs() {
     const [clubMembers, setClubMembers] = useState<Record<string, User[]>>({});
 
     const client = pb();
-
-    useEffect(() => {
-        fetchClubs();
-        fetchGradeLevels();
-    }, []);
-
-    const fetchClubMemberCounts = async (clubIds: string[]) => {
-        try {
-            const counts: Record<string, number> = {};
-            for (const clubId of clubIds) {
-                const records = await client.collection('reading_club_members').getFullList({
-                    filter: `club_id = "${clubId}"`,
-                    requestKey: Math.random().toString(),
-                    expand: 'user_id',
-                });
-                counts[clubId] = records.length;
-                setClubMembers(prevClubMembers => ({...prevClubMembers, [clubId]: records.map(item => item.expand?.user_id)}));
-            }
-            setClubMemberCounts(counts);
-        } catch (error) {
-            console.error('Error fetching member counts:', error);
-        }
-    };
 
     const fetchGradeLevels = async () => {
         try {
@@ -86,12 +64,34 @@ export default function Clubs() {
         }
     };
 
+    useEffect(() => {
+        fetchClubs().then(() => fetchGradeLevels());
+    }, [fetchClubs, fetchGradeLevels]);
+
+    const fetchClubMemberCounts = async (clubIds: string[]) => {
+        try {
+            const counts: Record<string, number> = {};
+            for (const clubId of clubIds) {
+                const records = await client.collection('reading_club_members').getFullList({
+                    filter: `club_id = "${clubId}"`,
+                    requestKey: Math.random().toString(),
+                    expand: 'user_id',
+                });
+                counts[clubId] = records.length;
+                setClubMembers(prevClubMembers => ({...prevClubMembers, [clubId]: records.map(item => item.expand?.user_id)}));
+            }
+            setClubMemberCounts(counts);
+        } catch (error) {
+            console.error('Error fetching member counts:', error);
+        }
+    };
+
     const fetchClubEvaluations = async (clubId: string) => {
         setIsLoadingEvaluations(true);
         try {
-            const records = await client.collection('self_evaluations').getFullList<StudentEvaluation>({
+            const records = await client.collection('surveys').getFullList<Survey>({
                 filter: `club_id = "${clubId}"`,
-                expand: 'student_id,book_id',
+                expand: 'student_id',
                 requestKey: Math.random().toString(),
             });
             setEvaluations(records);
@@ -218,8 +218,8 @@ export default function Clubs() {
             {selectedClub ? (
                 <ClubStudentCard
                     selectedClub={selectedClub}
-                    evaluations={evaluations}
-                    isLoadingEvaluations={isLoadingEvaluations}
+                    surveys={evaluations}
+                    isLoadingSurveys={isLoadingEvaluations}
                     countMembers={clubMemberCounts[selectedClub.id]}
                     clubMembers={clubMembers[selectedClub.id]}
                 />

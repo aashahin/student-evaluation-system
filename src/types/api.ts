@@ -4,6 +4,8 @@ export type User = {
     email: string;
     password: string;
     role: string;
+    age: number;
+    performance?: JSON;
     created: string;
     updated: string;
 }
@@ -23,23 +25,6 @@ export type ReadingClub = {
     };
 }
 
-export type StudentEvaluation = {
-    id: string;
-    book_id: string;
-    student_id: string;
-    club_id: string;
-    reading_speed: string;
-    comprehension_level: string;
-    engagement_level: string;
-    challenges: string;
-    created: string;
-    updated: string;
-    expand?: {
-        student_id?: User;
-        book_id?: Book;
-    };
-}
-
 export type GradeLevel = {
     id: string;
     name: string;
@@ -55,6 +40,26 @@ export type Book = {
     discussion_date: string;
     club_id: string;
     teacher_id: string;
+    created: string;
+    updated: string;
+}
+
+export type SurveyType = "self-assessment" | "teacher-assessment" | "parent-assessment";
+
+export type Survey = {
+    id: string;
+    type: SurveyType;
+    club_id: string;
+    student_id: string;
+    questions: {
+        data: {
+            question: string;
+            answer: string;
+        }[]
+    },
+    expand?: {
+        student_id?: User;
+    };
     created: string;
     updated: string;
 }

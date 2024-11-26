@@ -1,34 +1,35 @@
 "use client";
 
 import React, {useState} from "react";
-import {Award, Book, Clock, FileText, Loader, Star, TrendingUp, Users} from "lucide-react";
-import {ReadingClub, StudentEvaluation, User} from "@/types/api";
+import {Award, Book, FileText, Loader, TrendingUp, Users} from "lucide-react";
+import {ReadingClub, Survey, User} from "@/types/api";
 import {Button} from "@/components/ui/button";
 import {Dialog, DialogContent, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 
 type ClubStudentCardProps = {
     selectedClub: ReadingClub,
-    evaluations: StudentEvaluation[]
-    isLoadingEvaluations: boolean
+    surveys: Survey[]
+    isLoadingSurveys: boolean
     countMembers: number
     clubMembers: User[]
 }
 
 const TABS = [
-    {id: 'evaluations', label: 'تقييمات الطلاب', icon: Award},
+    {id: 'surveys', label: 'تقييمات الطلاب', icon: Award},
     {id: 'members', label: 'أعضاء النادي', icon: Users}
 ];
 
 const ClubStudentCard = (
     {
         selectedClub,
-        evaluations,
-        isLoadingEvaluations,
+        surveys,
+        isLoadingSurveys,
         countMembers,
         clubMembers
     }: ClubStudentCardProps) => {
-    const [activeTab, setActiveTab] = useState('evaluations');
-    const [openChallenges, setOpenChallenges] = useState(false);
+    const [activeTab, setActiveTab] = useState('surveys');
+    const [openSurveyDetails, setOpenSurveyDetails] = useState(false);
+    const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null);
 
     const renderStatCard = (icon: React.ReactNode, label: string, value: string | number, color: string) => (
         <div
@@ -42,7 +43,7 @@ const ClubStudentCard = (
     );
 
     const renderTable = (activeTab: string) => {
-        if (activeTab === 'evaluations' && isLoadingEvaluations) {
+        if (activeTab === 'surveys' && isLoadingSurveys) {
             return (
                 <div className="flex justify-center items-center p-12">
                     <Loader className="animate-spin text-blue-600 w-8 h-8"/>
@@ -57,7 +58,7 @@ const ClubStudentCard = (
                         <table className="min-w-full divide-y divide-gray-200 table-fixed">
                             <thead className="bg-gray-50">
                             <tr>
-                                {activeTab === 'evaluations' ? (
+                                {activeTab === 'surveys' ? (
                                     <>
                                         <th scope="col"
                                             className="px-6 py-4 text-start text-sm font-semibold text-gray-900 w-1/4">
@@ -65,19 +66,15 @@ const ClubStudentCard = (
                                         </th>
                                         <th scope="col"
                                             className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                                            مستوى المشاركة
+                                            نوع التقييم
                                         </th>
                                         <th scope="col"
                                             className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                                            مستوى الفهم
+                                            تاريخ التقييم
                                         </th>
                                         <th scope="col"
                                             className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                                            سرعة القراءة
-                                        </th>
-                                        <th scope="col"
-                                            className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                                            التحديات
+                                            تفاصيل التقييم
                                         </th>
                                     </>
                                 ) : (
@@ -95,56 +92,69 @@ const ClubStudentCard = (
                             </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                            {activeTab === 'evaluations' ? (
-                                evaluations.map((evaluation) => (
-                                    <tr key={evaluation.id} className="hover:bg-gray-50 transition-colors">
+                            {activeTab === 'surveys' ? (
+                                surveys.map((survey) => (
+                                    <tr key={survey.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {evaluation.expand?.student_id?.name || 'Unknown Student'}
+                                            {survey.expand?.student_id?.name ?? "غير معروف"}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <div
-                                                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-50 text-yellow-800">
-                                                <Star className="w-4 h-4 me-1.5 text-yellow-500"/>
-                                                {evaluation.engagement_level === "high" ? "مرتفع" :
-                                                    evaluation.engagement_level === "medium" ? "متوسط" : "منخفض"}
+                                            <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800">
+                                                {survey.type === "self-assessment" ? "تقييم ذاتي" :
+                                                    survey.type === "teacher-assessment" ? "تقييم المعلم" : "تقييم ولي الأمر"}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium
-                                                    ${evaluation.comprehension_level === "high" ? "bg-green-50 text-green-800" :
-                                                    evaluation.comprehension_level === "medium" ? "bg-yellow-50 text-yellow-800" :
-                                                        "bg-red-50 text-red-800"}`}>
-                                                    {evaluation.comprehension_level === "high" ? "مرتفع" :
-                                                        evaluation.comprehension_level === "medium" ? "متوسط" : "منخفض"}
-                                                </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <div
-                                                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800">
-                                                <Clock className="w-4 h-4 me-1.5 text-blue-500"/>
-                                                {evaluation.reading_speed === "slow" ? "سريع" :
-                                                    evaluation.reading_speed === "medium" ? "متوسط" : "بطيء"}
-                                            </div>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
+                                            {new Date(survey.created).toLocaleDateString('ar-SA')}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
                                             <Dialog
-                                                open={openChallenges}
-                                                onOpenChange={setOpenChallenges}
+                                                open={openSurveyDetails && selectedSurvey?.id === survey.id}
+                                                onOpenChange={(open) => {
+                                                    setOpenSurveyDetails(open);
+                                                    if (open) {
+                                                        setSelectedSurvey(survey);
+                                                    }
+                                                }}
                                             >
                                                 <DialogTrigger asChild>
                                                     <Button
-                                                        onClick={() => setOpenChallenges(true)}
                                                         variant="link"
                                                     >
-                                                        عرض
+                                                        عرض التفاصيل
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent>
-                                                    <DialogTitle>التحديات</DialogTitle>
+                                                    <DialogTitle>تفاصيل التقييم</DialogTitle>
                                                     <div className="mt-2 border-t border-gray-300"/>
-                                                    <p
-                                                        dangerouslySetInnerHTML={{__html: evaluation.challenges}}
-                                                    />
+                                                    <div className="space-y-4">
+                                                        <p className="font-medium text-gray-700">الأسئلة والإجابات:</p>
+                                                        <div className="space-y-3">
+                                                            {survey.questions.data.map((item, index) => (
+                                                                <div
+                                                                    key={index}
+                                                                    className="bg-gray-50 p-4 rounded-lg border border-gray-200"
+                                                                >
+                                                                    <div className="flex flex-col gap-2">
+                                                                        <div className="flex items-start gap-2">
+                                                                            <span className="font-semibold text-gray-700 min-w-[100px]">السؤال:</span>
+                                                                            <span className="text-gray-600">{item.question}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="font-semibold text-gray-700 min-w-[100px]">الإجابة:</span>
+                                                                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                                                                item.answer === "نعم"
+                                                                                    ? "bg-green-50 text-green-700"
+                                                                                    : "bg-red-50 text-red-700"
+                                                                            }`}>
+                                {item.answer}
+                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
                                                 </DialogContent>
                                             </Dialog>
                                         </td>
