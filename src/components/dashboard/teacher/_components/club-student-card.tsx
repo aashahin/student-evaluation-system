@@ -49,15 +49,15 @@ const ClubStudentCard = (
 
         return (
             <div className="overflow-x-auto rounded-xl border border-gray-200">
-                <div className="inline-block min-w-full align-middle">
-                    <div className="overflow-hidden shadow-sm">
-                        <table className="min-w-full divide-y divide-gray-200">
+                <div className="min-w-full inline-block align-middle max-w-[80vw]">
+                    <div className="overflow-hidden">
+                        <table className="min-w-full divide-y divide-gray-200 table-fixed">
                             <thead className="bg-gray-50">
                             <tr>
                                 {activeTab === 'evaluations' ? (
                                     <>
                                         <th scope="col"
-                                            className="px-6 py-4 text-right text-sm font-semibold text-gray-900">
+                                            className="px-6 py-4 text-start text-sm font-semibold text-gray-900 w-1/4">
                                             اسم الطالب
                                         </th>
                                         <th scope="col"
@@ -75,7 +75,7 @@ const ClubStudentCard = (
                                     </>
                                 ) : (
                                     <>
-                                        <th scope="col"
+                                    <th scope="col"
                                             className="px-6 py-4 text-right text-sm font-semibold text-gray-900">
                                             اسم الطالب
                                         </th>
@@ -148,7 +148,7 @@ const ClubStudentCard = (
     };
 
     return (
-        <div className="bg-white shadow-lg rounded-xl p-6 space-y-6">
+        <div className="bg-white shadow-lg rounded-xl p-6 space-y-6 mx-auto min-w-full">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                     <FileText className="text-blue-600"/>
@@ -185,9 +185,7 @@ const ClubStudentCard = (
                 ))}
             </div>
 
-            <div className="bg-gray-50 p-4 sm:p-6 rounded-xl">
-                {renderTable(activeTab)}
-            </div>
+            {renderTable(activeTab)}
         </div>
     );
 };
