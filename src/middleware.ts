@@ -20,22 +20,7 @@ export async function middleware(request: NextRequest) {
         const client = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_API_URL);
         client.authStore.loadFromCookie(`${authCookie.name}=${authCookie.value}`);
         if (client.authStore.isValid) {
-            const role = client.authStore.record!["role"];
             await client.collection("users").authRefresh();
-            const path = request.nextUrl.pathname;
-
-            if (path === "/") {
-                switch (role) {
-                    case "teacher":
-                        return NextResponse.redirect(new URL('/teacher', request.url));
-                    case "student":
-                        return NextResponse.redirect(new URL('/student', request.url));
-                    case "parent":
-                        return NextResponse.redirect(new URL('/parent', request.url));
-                    case "admin":
-                        return NextResponse.redirect(new URL('/admin', request.url));
-                }
-            }
             return response;
         } else {
             response.cookies.delete('pb_auth');

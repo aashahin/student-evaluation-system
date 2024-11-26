@@ -4,7 +4,7 @@ import {Award, Book, Clock, FileText, Loader, Search, Star, TrendingUp, Users} f
 import React, {useEffect, useState} from "react";
 import {GradeLevel, ReadingClub, StudentEvaluation} from "@/types/api";
 import {pb} from "@/lib/api";
-import CreateClubDialog from "@/app/(dashboard)/_components/create-club";
+import CreateClubDialog from "@/components/dashboard/_components/create-club";
 
 export default function Clubs() {
     const [readingClubs, setReadingClubs] = useState<ReadingClub[]>([]);

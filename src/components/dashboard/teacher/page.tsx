@@ -2,9 +2,9 @@
 
 import React, {useState} from "react";
 import {BookOpen, FileText} from "lucide-react";
-import Reports from "@/app/(dashboard)/teacher/_components/reports";
-import Clubs from "@/app/(dashboard)/teacher/_components/clubs";
-import Header from "@/app/(dashboard)/teacher/_components/header";
+import Reports from "@/components/dashboard/teacher/_components/reports";
+import Clubs from "@/components/dashboard/teacher/_components/clubs";
+import Header from "@/components/dashboard/teacher/_components/header";
 
 const tabs = [
     {
