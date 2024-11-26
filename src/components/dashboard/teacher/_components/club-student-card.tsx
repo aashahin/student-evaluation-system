@@ -233,7 +233,7 @@ const ClubStudentCard = (
                                                         عرض التفاصيل
                                                     </Button>
                                                 </DialogTrigger>
-                                                <DialogContent className="bg-white">
+                                                <DialogContent className="bg-gray-50">
                                                     <DialogTitle>تفاصيل التقييم</DialogTitle>
                                                     <div className="mt-2 border-t border-gray-300"/>
                                                      <SurveyDetails survey={survey}/>
