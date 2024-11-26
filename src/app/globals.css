@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "IBM Plex Sans Arabic", Arial, Helvetica, sans-serif;
 }
 
 @layer base {
@@ -47,8 +47,10 @@ body {
 @layer base {
   * {
     @apply border-border;
+    scrollbar-width: none;
   }
   body {
     @apply bg-background text-foreground;
   }
 }
+

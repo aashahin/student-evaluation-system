@@ -41,7 +41,6 @@ export default function Clubs() {
                 requestKey: Math.random().toString(),
                 expand: 'grade_level',
             });
-            console.log(...records);
             setReadingClubs(records);
         } catch (error) {
             console.error('Error fetching reading clubs:', error);

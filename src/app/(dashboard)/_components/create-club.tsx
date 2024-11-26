@@ -23,16 +23,30 @@ import {
 import {Plus} from "lucide-react"
 import {pb} from "@/lib/api"
 import {GradeLevel} from "@/types/api"
-import {Textarea} from "@/components/ui/textarea";
+import {Textarea} from "@/components/ui/textarea"
+import {AnimatePresence, motion} from "framer-motion";
 
 type CreateClubDialogProps = {
     gradeLevels: GradeLevel[];
     onClubCreated: () => void;
 }
 
+type FormState = {
+    errors: {
+        name?: string;
+        grade_level?: string;
+    };
+    message?: string;
+}
+
+const initialState: FormState = {
+    errors: {}
+}
+
 const CreateClubDialog = ({gradeLevels, onClubCreated}: CreateClubDialogProps) => {
     const [open, setOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [formState, setFormState] = useState<FormState>(initialState)
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -40,16 +54,38 @@ const CreateClubDialog = ({gradeLevels, onClubCreated}: CreateClubDialogProps) =
         max_members: ""
     })
 
+    const validateForm = (): boolean => {
+        const errors: FormState['errors'] = {}
+
+        if (!formData.name.trim()) {
+            errors.name = "اسم النادي مطلوب"
+        }
+
+        if (!formData.grade_level) {
+            errors.grade_level = "المرحلة الدراسية مطلوبة"
+        }
+
+        setFormState({errors})
+        return Object.keys(errors).length === 0
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (!validateForm()) {
+            return
+        }
+
         setIsLoading(true)
 
         try {
             const client = pb()
             await client.collection('reading_clubs').create({
-                ...formData,
+                name: formData.name,
+                grade_level: formData.grade_level,
                 teacher_id: client.authStore.record?.id,
-                ...(formData.max_members.length > 0 && { max_members: parseInt(formData.max_members) }),
+                ...(formData.max_members.length > 0 && {max_members: parseInt(formData.max_members)}),
+                ...(formData.description.length > 0 && {description: formData.description}),
             })
 
             setOpen(false)
@@ -59,9 +95,13 @@ const CreateClubDialog = ({gradeLevels, onClubCreated}: CreateClubDialogProps) =
                 grade_level: "",
                 max_members: ""
             })
+            setFormState(initialState)
             onClubCreated()
         } catch (error) {
-            console.error('Error creating club:', error)
+            setFormState({
+                errors: {},
+                message: "حدث خطأ أثناء إنشاء النادي"
+            })
         } finally {
             setIsLoading(false)
         }
@@ -83,16 +123,48 @@ const CreateClubDialog = ({gradeLevels, onClubCreated}: CreateClubDialogProps) =
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
+                    {formState.message && (
+                        <AnimatePresence>
+                            {formState.message && (
+                                <motion.div
+                                    initial={{opacity: 0, y: -10}}
+                                    animate={{opacity: 1, y: 0}}
+                                    exit={{opacity: 0, y: -10}}
+                                    className="p-3 rounded-lg bg-red-50 text-red-600 text-sm"
+                                >
+                                    <p>{formState.message}</p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    )}
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">اسم النادي</Label>
+                            <Label htmlFor="name" className="flex">
+                                اسم النادي
+                                <span className="text-red-500 mr-1">*</span>
+                            </Label>
                             <Input
                                 id="name"
                                 value={formData.name}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                className={formState.errors.name ? "border-red-500" : ""}
                                 required
                                 placeholder="مثال: الشعر العربي"
                             />
+                            {formState.errors.name && (
+                                <AnimatePresence>
+                                    {formState.errors && (
+                                        <motion.div
+                                            initial={{opacity: 0, y: -10}}
+                                            animate={{opacity: 1, y: 0}}
+                                            exit={{opacity: 0, y: -10}}
+                                            className="p-3 rounded-lg bg-red-50 text-red-600 text-sm"
+                                        >
+                                            <p>{formState.errors.name}</p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            )}
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="description">وصف النادي</Label>
@@ -104,13 +176,16 @@ const CreateClubDialog = ({gradeLevels, onClubCreated}: CreateClubDialogProps) =
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="grade">المرحلة الدراسية</Label>
+                            <Label htmlFor="grade" className="flex">
+                                المرحلة الدراسية
+                                <span className="text-red-500 mr-1">*</span>
+                            </Label>
                             <Select
                                 value={formData.grade_level}
                                 onValueChange={(value) => setFormData({...formData, grade_level: value})}
                                 required
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className={formState.errors.grade_level ? "border-red-500" : ""}>
                                     <SelectValue placeholder="اختر المرحلة"/>
                                 </SelectTrigger>
                                 <SelectContent>
@@ -121,6 +196,9 @@ const CreateClubDialog = ({gradeLevels, onClubCreated}: CreateClubDialogProps) =
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {formState.errors.grade_level && (
+                                <span className="text-red-500 text-sm">{formState.errors.grade_level}</span>
+                            )}
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="max_members">الحد الأقصى للأعضاء</Label>
@@ -132,6 +210,7 @@ const CreateClubDialog = ({gradeLevels, onClubCreated}: CreateClubDialogProps) =
                                     ...formData,
                                     max_members: e.target.value
                                 })}
+                                min={3}
                                 placeholder="اتركه فارغا للحصول على الحد الأقصى (لا نهائي)"
                             />
                         </div>
