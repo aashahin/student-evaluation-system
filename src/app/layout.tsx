@@ -2,6 +2,7 @@ import React from "react";
 import type {Metadata} from "next";
 import "./globals.css";
 import {IBM_Plex_Sans_Arabic} from "next/font/google";
+import {Toaster} from "sonner";
 
 const fontFamily = IBM_Plex_Sans_Arabic({
     subsets: ["arabic", "latin"],
@@ -44,6 +45,14 @@ export default function RootLayout(
             dir="rtl"
         >
         {children}
+        <Toaster
+            dir="rtl"
+            position="bottom-left"
+            style={{
+                fontFamily: fontFamily.style.fontFamily,
+            }}
+            richColors={true}
+        />
         </body>
         </html>
     );

@@ -23,7 +23,6 @@ export function pb() {
     singletonClient.authStore.onChange(() => {
         document.cookie = singletonClient!.authStore.exportToCookie({
             httpOnly: false,
-            secure: process.env.NODE_ENV === "production",
         });
     });
 

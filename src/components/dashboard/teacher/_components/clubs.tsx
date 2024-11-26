@@ -1,10 +1,24 @@
 "use client";
 
-import {Award, Book, Clock, FileText, Loader, Search, Star, TrendingUp, Users} from "lucide-react";
 import React, {useEffect, useState} from "react";
-import {GradeLevel, ReadingClub, StudentEvaluation} from "@/types/api";
+import {Book, Loader, Search, Users} from "lucide-react";
+import {GradeLevel, ReadingClub, StudentEvaluation, User} from "@/types/api";
 import {pb} from "@/lib/api";
 import CreateClubDialog from "@/components/dashboard/_components/create-club";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+import {Trash2} from "lucide-react";
+import {toast} from "sonner";
+import ClubStudentCard from "@/components/dashboard/teacher/_components/club-student-card";
 
 export default function Clubs() {
     const [readingClubs, setReadingClubs] = useState<ReadingClub[]>([]);
@@ -14,6 +28,8 @@ export default function Clubs() {
     const [isLoadingEvaluations, setIsLoadingEvaluations] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [gradeLevels, setGradeLevels] = useState<GradeLevel[]>([]);
+    const [clubMemberCounts, setClubMemberCounts] = useState<Record<string, number>>({});
+    const [clubMembers, setClubMembers] = useState<Record<string, User[]>>({});
 
     const client = pb();
 
@@ -21,6 +37,24 @@ export default function Clubs() {
         fetchClubs();
         fetchGradeLevels();
     }, []);
+
+    const fetchClubMemberCounts = async (clubIds: string[]) => {
+        try {
+            const counts: Record<string, number> = {};
+            for (const clubId of clubIds) {
+                const records = await client.collection('reading_club_members').getFullList({
+                    filter: `club_id = "${clubId}"`,
+                    requestKey: Math.random().toString(),
+                    expand: 'user_id',
+                });
+                counts[clubId] = records.length;
+                setClubMembers(prevClubMembers => ({...prevClubMembers, [clubId]: records.map(item => item.expand?.user_id)}));
+            }
+            setClubMemberCounts(counts);
+        } catch (error) {
+            console.error('Error fetching member counts:', error);
+        }
+    };
 
     const fetchGradeLevels = async () => {
         try {
@@ -36,12 +70,15 @@ export default function Clubs() {
     const fetchClubs = async () => {
         setIsLoading(true);
         try {
+            const teacherId = client.authStore.record?.id;
             const records = await client.collection('reading_clubs').getFullList<ReadingClub>({
+                filter: `teacher_id = '${teacherId}'`,
                 sort: '-created',
                 requestKey: Math.random().toString(),
                 expand: 'grade_level',
             });
             setReadingClubs(records);
+            await fetchClubMemberCounts(records.map(club => club.id));
         } catch (error) {
             console.error('Error fetching reading clubs:', error);
         } finally {
@@ -70,12 +107,24 @@ export default function Clubs() {
         fetchClubEvaluations(club.id).then(() => setIsLoadingEvaluations(false));
     };
 
+    const handleDeleteClub = async (clubId: string) => {
+        try {
+            await client.collection('reading_clubs').delete(clubId);
+            toast.success('تم حذف النادي بنجاح');
+            setSelectedClub(null);
+            await fetchClubs();
+        } catch (error) {
+            console.error('Error deleting club:', error);
+            toast.error('حدث خطأ أثناء حذف النادي');
+        }
+    };
+
     const filteredClubs = readingClubs.filter(club =>
         club.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-white shadow rounded-xl p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -104,144 +153,76 @@ export default function Clubs() {
                         <Loader className="animate-spin text-blue-600"/>
                     </div>
                 ) : (
-                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                        {filteredClubs.map((club) => (
-                            <div
-                                key={club.id}
-                                onClick={() => handleClubSelect(club)}
-                                className={`border p-5 rounded-xl cursor-pointer transition-all duration-200 hover:shadow ${
-                                    selectedClub?.id === club.id
-                                        ? "border-blue-500 bg-blue-50 shadow"
-                                        : "border-gray-200 hover:border-blue-300"
-                                }`}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <h3 className="font-bold text-lg mb-2">{club.name}</h3>
-                                        <div className="flex items-center gap-4">
-                            <span className="flex items-center text-sm text-gray-600">
-                              <Users className="inline-block ml-1 w-4 h-4"/>
-                                {club.max_members} عضو
-                            </span>
-                                            <span className="text-sm px-3 py-1 bg-gray-100 rounded-full text-gray-600">
-                              {club.expand?.grade_level?.name}
-                            </span>
+                    <div className="space-y-4 max-h-[600px] overflow-y-auto ps-2">
+                        {filteredClubs.map((club) => {
+                            return (
+                                <div
+                                    key={club.id}
+                                    className={`border p-5 rounded-xl transition-all duration-200 hover:shadow ${
+                                        selectedClub?.id === club.id
+                                            ? "border-blue-500 bg-blue-50 shadow"
+                                            : "border-gray-200 hover:border-blue-300"
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <div
+                                            onClick={() => handleClubSelect(club)}
+                                            className="flex-1 cursor-pointer"
+                                        >
+                                            <h3 className="font-bold text-lg mb-2">{club.name}</h3>
+                                            <div className="flex items-center gap-4">
+        <span className="flex items-center text-sm text-gray-600">
+    <Users className="inline-block me-1 w-4 h-4"/>
+            {clubMemberCounts[club.id]}/{clubMemberCounts[club.id] > 0 ? club.max_members : '∞'}
+</span>
+                                                <span
+                                                    className="text-sm px-3 py-1 bg-gray-100 rounded-full text-gray-600">
+            {club.expand?.grade_level?.name}
+          </span>
+                                            </div>
                                         </div>
+
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <button className="p-2 hover:bg-red-50 rounded-full transition-colors">
+                                                    <Trash2 className="w-4 h-4 text-red-500"/>
+                                                </button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>هل أنت متأكد من حذف النادي؟</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        سيتم حذف النادي وجميع البيانات المرتبطة به بشكل نهائي.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        className="bg-red-500 hover:bg-red-600"
+                                                        onClick={() => handleDeleteClub(club.id)}
+                                                    >
+                                                        حذف النادي
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            )
+                        })
+                        }
                     </div>
                 )}
             </div>
 
             {selectedClub ? (
-                <div className="bg-white shadow rounded-xl p-6">
-                    <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                        <FileText className="text-blue-600"/>
-                        تفاصيل النادي: {selectedClub.name}
-                    </h2>
-
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                        <div className="bg-gray-50 p-4 rounded-xl">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Users className="text-blue-600"/>
-                                <p className="text-sm text-gray-600">عدد الأعضاء</p>
-                            </div>
-                            <p className="text-2xl font-bold text-blue-600">
-                                {selectedClub.max_members}
-                            </p>
-                        </div>
-                        <div className="bg-gray-50 p-4 rounded-xl">
-                            <div className="flex items-center gap-2 mb-2">
-                                <TrendingUp className="text-green-600"/>
-                                <p className="text-sm text-gray-600">معدل النشاط</p>
-                            </div>
-                            <p className="text-2xl font-bold text-green-600">85%</p>
-                        </div>
-                        <div className="bg-gray-50 p-4 rounded-xl">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Book className="text-purple-600"/>
-                                <p className="text-sm text-gray-600">الكتب المقروءة</p>
-                            </div>
-                            <p className="text-2xl font-bold text-purple-600">12</p>
-                        </div>
-                    </div>
-
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                        <h3 className="font-bold mb-4 flex items-center gap-2">
-                            <Award className="text-blue-600"/>
-                            تقييمات الطلاب
-                        </h3>
-                        {isLoadingEvaluations ? (
-                            <div className="flex justify-center items-center p-8">
-                                <Loader className="animate-spin text-blue-600"/>
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                    <tr className="bg-gray-100 rounded-lg">
-                                        <th className="p-3 text-right">اسم الطالب</th>
-                                        <th className="p-3 text-center">مستوى المشاركة</th>
-                                        <th className="p-3 text-center">مستوى الفهم</th>
-                                        <th className="p-3 text-center">سرعة القراءة</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {evaluations.map((evaluation) => (
-                                        <tr key={evaluation.id} className="border-b border-gray-200">
-                                            <td className="p-3">
-                                                {evaluation.expand?.student_id?.name || 'Unknown Student'}
-                                            </td>
-                                            <td className="p-3 text-center">
-                                                <div className="flex items-center justify-center">
-                                                    <Star className="text-yellow-500 me-1"/>
-                                                    {evaluation.engagement_level === "high"
-                                                        ? "مرتفع"
-                                                        : evaluation.engagement_level === "medium"
-                                                            ? "متوسط"
-                                                            : "منخفض"}
-                                                </div>
-                                            </td>
-                                            <td className="p-3 text-center">
-                                <span
-                                    className={`
-                                    px-3 py-1 rounded-full text-sm
-                                    ${
-                                        evaluation.comprehension_level === "high"
-                                            ? "bg-green-100 text-green-800"
-                                            : evaluation.comprehension_level === "medium"
-                                                ? "bg-yellow-100 text-yellow-800"
-                                                : "bg-red-100 text-red-800"
-                                    }
-                                  `}
-                                >
-                                  {evaluation.comprehension_level === "high"
-                                      ? "مرتفع"
-                                      : evaluation.comprehension_level === "medium"
-                                          ? "متوسط"
-                                          : "منخفض"}
-                                </span>
-                                            </td>
-                                            <td className="p-3 text-center">
-                                                <div className="flex items-center justify-center">
-                                                    <Clock className="text-blue-500 me-1"/>
-                                                    {evaluation.reading_speed === "slow"
-                                                        ? "سريع"
-                                                        : evaluation.reading_speed === "medium"
-                                                            ? "متوسط"
-                                                            : "بطيء"}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <ClubStudentCard
+                    selectedClub={selectedClub}
+                    evaluations={evaluations}
+                    isLoadingEvaluations={isLoadingEvaluations}
+                    countMembers={clubMemberCounts[selectedClub.id]}
+                    clubMembers={clubMembers[selectedClub.id]}
+                />
             ) : (
                 <div className="bg-white shadow rounded-xl p-6 flex items-center justify-center text-gray-500">
                     اختر ناديًا لعرض التفاصيل
