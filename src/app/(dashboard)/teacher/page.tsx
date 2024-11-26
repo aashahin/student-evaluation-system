@@ -1,12 +1,37 @@
-export default function TeacherPage() {
+"use client";
+
+import React, {useState} from "react";
+import {BookOpen, FileText} from "lucide-react";
+import Reports from "@/app/(dashboard)/teacher/_components/reports";
+import Clubs from "@/app/(dashboard)/teacher/_components/clubs";
+import Header from "@/app/(dashboard)/teacher/_components/header";
+
+const tabs = [
+    {
+        id: "clubs",
+        label: "نوادي القراءة",
+        icon: BookOpen,
+    },
+    {
+        id: "reports",
+        label: "التقارير",
+        icon: FileText,
+    },
+];
+
+const TeacherDashboard = () => {
+    const [activeTab, setActiveTab] = useState("clubs");
+
     return (
-        <div className="flex flex-col items-center justify-center">
-            <h1 className="text-3xl font-bold text-primary bg-clip-text">
-                المدرسة التعليمية
-            </h1>
-            <p className="text-sm text-gray-500">
-                تعلم أولاً
-            </p>
-        </div>
-    )
-}
+        <>
+            <Header tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}/>
+
+            <div className="container mx-auto px-4 sm:px-6 py-8">
+                {activeTab === "clubs" && <Clubs/>}
+                {activeTab === "reports" && <Reports/>}
+            </div>
+        </>
+    );
+};
+
+export default TeacherDashboard;
