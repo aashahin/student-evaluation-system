@@ -1,8 +1,5 @@
-'use server';
-
 import {pb} from "@/lib/api";
 import {ClientResponseError} from "pocketbase";
-import {cookies} from "next/headers";
 
 export type RegisterState = {
     name: string;
@@ -45,12 +42,9 @@ async function registerAction(currentState: RegisterState, formData: FormData) {
         await client.collection("users").authWithPassword(email, password);
 
         if (record && client.authStore.isValid) {
-            const token = client.authStore.exportToCookie({
+            document.cookie = client.authStore.exportToCookie({
                 httpOnly: false,
-                secure: process.env.NODE_ENV === "production"
             });
-            const cookieStore = await cookies();
-            cookieStore.set('pb_auth', token);
             return { ...currentState, error: "", isLoading: false, isRegistered: true };
         } else {
             return {

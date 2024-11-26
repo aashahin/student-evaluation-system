@@ -1,8 +1,5 @@
-'use server'
-
 import {pb} from "@/lib/api";
 import {ClientResponseError} from "pocketbase";
-import {cookies} from "next/headers";
 
 export type LoginState = {
     email: string;
@@ -23,12 +20,9 @@ async function loginAction(currentState: LoginState, formData: FormData) {
             .authWithPassword(email, password);
 
         if (authData && client.authStore.isValid) {
-            const token = client.authStore.exportToCookie({
+            document.cookie = client.authStore.exportToCookie({
                 httpOnly: false,
-                secure: process.env.NODE_ENV === "production"
             });
-            const cookieStore = await cookies();
-            cookieStore.set('pb_auth', token);
             return {...currentState, error: "", isLoading: false, isAuthenticated: true};
         } else {
             return {
