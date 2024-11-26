@@ -48,9 +48,9 @@ const ClubStudentCard = (
         }
 
         return (
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <div className="rounded-xl border border-gray-200">
                 <div className="min-w-full inline-block align-middle max-w-[80vw]">
-                    <div className="overflow-hidden">
+                    <div className="overflow-x-scroll">
                         <table className="min-w-full divide-y divide-gray-200 table-fixed">
                             <thead className="bg-gray-50">
                             <tr>
@@ -75,7 +75,7 @@ const ClubStudentCard = (
                                     </>
                                 ) : (
                                     <>
-                                    <th scope="col"
+                                        <th scope="col"
                                             className="px-6 py-4 text-right text-sm font-semibold text-gray-900">
                                             اسم الطالب
                                         </th>

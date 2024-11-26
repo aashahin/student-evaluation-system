@@ -22,6 +22,7 @@ async function loginAction(currentState: LoginState, formData: FormData) {
         if (authData && client.authStore.isValid) {
             document.cookie = client.authStore.exportToCookie({
                 httpOnly: false,
+                secure: false,
             });
             return {...currentState, error: "", isLoading: false, isAuthenticated: true};
         } else {

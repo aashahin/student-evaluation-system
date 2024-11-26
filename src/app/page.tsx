@@ -5,7 +5,7 @@ import TeacherDashboard from "@/components/dashboard/teacher/page";
 export default async function Home() {
     const cookieStore = await cookies();
     const client = serverPB(cookieStore);
-    const role = client.authStore.record!["role"];
+    const role = client.authStore.record ? client.authStore.record["role"] : "";
 
     if (role === "teacher") {
         return <TeacherDashboard/>;
