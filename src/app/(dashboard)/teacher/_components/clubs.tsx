@@ -76,7 +76,6 @@ export default function Clubs() {
 
     return (
         <div className="grid md:grid-cols-2 gap-8">
-            {/* Reading Clubs Section */}
             <div className="bg-white shadow rounded-xl p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -89,7 +88,6 @@ export default function Clubs() {
                     />
                 </div>
 
-                {/* Search Bar */}
                 <div className="relative mb-6">
                     <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"/>
                     <input
@@ -137,7 +135,6 @@ export default function Clubs() {
                 )}
             </div>
 
-            {/* Club Details Section */}
             {selectedClub ? (
                 <div className="bg-white shadow rounded-xl p-6">
                     <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
@@ -145,7 +142,6 @@ export default function Clubs() {
                         تفاصيل النادي: {selectedClub.name}
                     </h2>
 
-                    {/* Stats Cards */}
                     <div className="grid grid-cols-3 gap-4 mb-6">
                         <div className="bg-gray-50 p-4 rounded-xl">
                             <div className="flex items-center gap-2 mb-2">
@@ -172,7 +168,6 @@ export default function Clubs() {
                         </div>
                     </div>
 
-                    {/* Evaluations Table */}
                     <div className="bg-gray-50 p-6 rounded-xl">
                         <h3 className="font-bold mb-4 flex items-center gap-2">
                             <Award className="text-blue-600"/>
