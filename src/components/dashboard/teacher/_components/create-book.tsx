@@ -110,7 +110,6 @@ const CreateBookDialog = ({ clubId, fetchBooks }: CreateBookDialogProps) => {
               value={formData.description}
               onChange={handleChange}
               placeholder="أدخل وصف الكتاب"
-              required
               className="w-full transition-all focus:ring-2"
               rows={5}
             />
@@ -123,7 +122,6 @@ const CreateBookDialog = ({ clubId, fetchBooks }: CreateBookDialogProps) => {
               value={formData.author}
               onChange={handleChange}
               placeholder="أدخل اسم المؤلف"
-              required
               className="w-full transition-all focus:ring-2"
             />
           </div>
@@ -136,8 +134,6 @@ const CreateBookDialog = ({ clubId, fetchBooks }: CreateBookDialogProps) => {
               value={formData.page_count}
               onChange={handleChange}
               placeholder="أدخل عدد الصفحات"
-              required
-              min="1"
               className="w-full transition-all focus:ring-2"
             />
           </div>

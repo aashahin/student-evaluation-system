@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -35,9 +35,35 @@ const EditBookDialog = ({
     description: book.description,
     author: book.author,
     page_count: book.page_count ? book.page_count.toString() : "",
-    discussion_date: new Date(book.discussion_date),
+    discussion_date: new Date(book.discussion_date).toISOString().split("T")[0],
   });
   const client = pb();
+
+  useEffect(() => {
+    if (open && book) {
+      setFormData({
+        title: book.title,
+        description: book.description,
+        author: book.author,
+        page_count: book.page_count ? book.page_count.toString() : "",
+        discussion_date: new Date(book.discussion_date)
+          .toISOString()
+          .split("T")[0],
+      });
+    }
+  }, [book, open]);
+
+  // Reset form when dialog closes
+  const handleClose = () => {
+    setOpen(false);
+    setFormData({
+      title: "",
+      description: "",
+      author: "",
+      page_count: "",
+      discussion_date: "",
+    });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -59,7 +85,7 @@ const EditBookDialog = ({
       });
       toast.success("تم تعديل الكتاب بنجاح");
       await fetchBooks();
-      setOpen(false);
+      handleClose();
     } catch (error) {
       toast.error("حدث خطأ أثناء تعديل الكتاب");
     } finally {
@@ -99,7 +125,6 @@ const EditBookDialog = ({
               value={formData.description}
               onChange={handleChange}
               placeholder="أدخل وصف الكتاب"
-              required
               className="w-full transition-all focus:ring-2"
               rows={5}
             />
@@ -112,7 +137,6 @@ const EditBookDialog = ({
               value={formData.author}
               onChange={handleChange}
               placeholder="أدخل اسم المؤلف"
-              required
               className="w-full transition-all focus:ring-2"
             />
           </div>
@@ -125,8 +149,6 @@ const EditBookDialog = ({
               value={formData.page_count}
               onChange={handleChange}
               placeholder="أدخل عدد الصفحات"
-              required
-              min="1"
               className="w-full transition-all focus:ring-2"
             />
           </div>
@@ -136,7 +158,7 @@ const EditBookDialog = ({
               id="discussion_date"
               name="discussion_date"
               type="date"
-              value={formData.discussion_date.toString()}
+              value={formData.discussion_date}
               onChange={handleChange}
               required
               className="w-full transition-all focus:ring-2"
