@@ -76,3 +76,11 @@ export type Survey = {
   created: string;
   updated: string;
 };
+
+export type Guide = {
+  id: string;
+  type: string;
+  files: string[];
+  created: string;
+  updated: string;
+};

@@ -112,6 +112,8 @@ const CreateSurveyDialog = ({
       });
 
       await fetchClubs();
+      setCurrentStep(0);
+      setFormattedAnswers([]);
       setOpen(false);
       toast.success("تم إضافة التقييم بنجاح.");
     } catch (error) {
