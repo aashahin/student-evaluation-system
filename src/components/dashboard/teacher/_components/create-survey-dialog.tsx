@@ -147,7 +147,7 @@ export default function CreateSurveyDialog({
         <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 overflow-y-scroll">
           <DrawerHeader className="sticky top-0 bg-background z-10 pb-4">
             <DrawerTitle className="text-xl sm:text-2xl font-bold text-center mb-4">
-              نموذج التقييم الجديد
+              نموذج التقييم
             </DrawerTitle>
 
             <div className="flex items-center gap-2 sm:gap-4 mb-6">
