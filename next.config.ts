@@ -6,10 +6,9 @@ const nextConfig: NextConfig = {
     ppr: true,
     turbo: {
       rules: {
-        "**/*.node.js": {
-          alias: {
-            canvas: false,
-          },
+        // Handle .node files
+        "**/*.node": {
+          loaders: ["raw-loader"],
         },
       },
     },
