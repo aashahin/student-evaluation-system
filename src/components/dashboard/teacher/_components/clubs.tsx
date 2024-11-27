@@ -121,7 +121,6 @@ export default function Clubs() {
           selectedClub={selectedClub}
           surveys={evaluations}
           isLoadingSurveys={isLoadingEvaluations}
-          countMembers={clubMemberCounts[selectedClub.id]}
           clubMembers={clubMembers[selectedClub.id]}
           client={client}
           fetchClubs={fetchClubs}

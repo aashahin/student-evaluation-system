@@ -44,6 +44,16 @@ export type Book = {
   updated: string;
 };
 
+export type ReadingBook = {
+  id: string;
+  book_id: string;
+  student_id: string;
+  club_id: string;
+  is_read: boolean;
+  created: string;
+  updated: string;
+};
+
 export type SurveyType =
   | "self-assessment"
   | "teacher-assessment"

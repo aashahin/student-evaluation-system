@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import { Award, Book, FileText, TrendingUp, Users } from "lucide-react";
-import { ReadingClub, Survey, User } from "@/types/api";
+import React, { useEffect, useState } from "react";
+import { Award, BookIcon, FileText, TrendingUp, Users } from "lucide-react";
+import { ReadingBook, ReadingClub, Survey, User } from "@/types/api";
 import ClubStudentTable from "@/components/dashboard/teacher/_components/club-student-table";
 import PocketBase from "pocketbase";
+import { toast } from "sonner";
+import { calculateClubStats } from "@/stats/teacher";
 
 type ClubStudentCardProps = {
   selectedClub: ReadingClub;
   surveys: Survey[];
   isLoadingSurveys: boolean;
-  countMembers: number;
   clubMembers: User[];
   client: PocketBase;
   fetchClubs: () => Promise<void>;
@@ -45,12 +46,39 @@ const ClubStudentCard = ({
   selectedClub,
   surveys,
   isLoadingSurveys,
-  countMembers,
   clubMembers,
   client,
   fetchClubs,
 }: ClubStudentCardProps) => {
   const [activeTab, setActiveTab] = useState("surveys");
+  const [books, setBooks] = useState<ReadingBook[]>([]);
+
+  const fetchBooks = async () => {
+    try {
+      const booksData = await client
+        .collection("reading_books")
+        .getList<ReadingBook>(1, 50, {
+          filter: `club_id = "${selectedClub.id}" && is_read = true`,
+          requestKey: Math.random().toString(),
+        });
+      setBooks(booksData.items);
+    } catch (error) {
+      toast.error("حدث خطأ أثناء الحصول على الكتب المقروءة للمجموعة");
+    }
+  };
+
+  useEffect(() => {
+    if (selectedClub) {
+      fetchBooks();
+    }
+  }, [selectedClub]);
+
+  const stats = calculateClubStats(
+    surveys,
+    clubMembers || [],
+    selectedClub.max_members,
+    books,
+  );
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-6 space-y-8">
@@ -73,19 +101,19 @@ const ClubStudentCard = ({
         <StatCard
           icon={<Users />}
           label="عدد الأعضاء"
-          value={`${countMembers}/${selectedClub.max_members > 0 ? selectedClub.max_members : "∞"}`}
+          value={`${stats.memberCount}/${stats.maxMembers ?? "∞"}`}
           color="blue"
         />
         <StatCard
           icon={<TrendingUp />}
           label="معدل النشاط"
-          value="85%"
+          value={`${stats.activityRate}%`}
           color="green"
         />
         <StatCard
-          icon={<Book />}
+          icon={<BookIcon />}
           label="الكتب المقروءة"
-          value="12"
+          value={`${stats.readBooksCount}`}
           color="purple"
         />
       </div>

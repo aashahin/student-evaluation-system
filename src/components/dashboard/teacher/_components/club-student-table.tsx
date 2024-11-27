@@ -220,6 +220,11 @@ const ClubStudentTable = ({
               لا يوجد أعضاء في النادي حالياً
             </div>
           )}
+          {activeTab === "surveys" && surveys.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              لا توجد تقييمات حالياً
+            </div>
+          )}
         </div>
       </div>
     </div>
