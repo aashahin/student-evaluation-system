@@ -13,6 +13,7 @@ type ClubStudentCardProps = {
   countMembers: number;
   clubMembers: User[];
   client: PocketBase;
+  fetchClubs: () => Promise<void>;
 };
 
 const TABS = [
@@ -47,6 +48,7 @@ const ClubStudentCard = ({
   countMembers,
   clubMembers,
   client,
+  fetchClubs,
 }: ClubStudentCardProps) => {
   const [activeTab, setActiveTab] = useState("surveys");
 
@@ -116,6 +118,7 @@ const ClubStudentCard = ({
         isLoadingSurveys={isLoadingSurveys}
         clubId={selectedClub.id}
         client={client}
+        fetchClubs={fetchClubs}
       />
     </div>
   );

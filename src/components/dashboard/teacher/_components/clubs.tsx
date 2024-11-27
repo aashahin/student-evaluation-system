@@ -81,12 +81,28 @@ export default function Clubs() {
     }
   };
 
+  const fetchClubEvaluations = async (clubId: string) => {
+    setIsLoadingEvaluations(true);
+    try {
+      const records = await client.collection("surveys").getFullList<Survey>({
+        filter: `club_id = "${clubId}"`,
+        expand: "student_id",
+        sort: "-created",
+        requestKey: Math.random().toString(),
+      });
+      setEvaluations(records);
+    } catch (error) {
+      toast.error("حدث خطأ ما أثناء إستدعاء الإستبيانات");
+    } finally {
+      setIsLoadingEvaluations(false);
+    }
+  };
+
   return (
     <div className="grid md:grid-cols-2 gap-4">
       <ClubsSection
         readingClubs={readingClubs}
         setSelectedClub={setSelectedClub}
-        setEvaluations={setEvaluations}
         gradeLevels={gradeLevels}
         fetchClubs={fetchClubs}
         setIsLoadingEvaluations={setIsLoadingEvaluations}
@@ -94,6 +110,7 @@ export default function Clubs() {
         isLoading={isLoading}
         clubMemberCounts={clubMemberCounts}
         selectedClub={selectedClub}
+        fetchClubEvaluations={fetchClubEvaluations}
       />
 
       {selectedClub ? (
@@ -104,6 +121,7 @@ export default function Clubs() {
           countMembers={clubMemberCounts[selectedClub.id]}
           clubMembers={clubMembers[selectedClub.id]}
           client={client}
+          fetchClubs={fetchClubs}
         />
       ) : (
         <div className="bg-white shadow rounded-xl p-6 flex items-center justify-center text-gray-500">

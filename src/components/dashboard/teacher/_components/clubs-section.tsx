@@ -19,7 +19,6 @@ import {
 const ClubsSection = ({
   readingClubs,
   setSelectedClub,
-  setEvaluations,
   gradeLevels,
   fetchClubs,
   setIsLoadingEvaluations,
@@ -27,10 +26,10 @@ const ClubsSection = ({
   isLoading,
   clubMemberCounts,
   selectedClub,
+  fetchClubEvaluations,
 }: {
   readingClubs: ReadingClub[];
   setSelectedClub: (club: ReadingClub | null) => void;
-  setEvaluations: (evaluations: Survey[]) => void;
   gradeLevels: GradeLevel[];
   fetchClubs: () => Promise<void>;
   setIsLoadingEvaluations: (isLoadingEvaluations: boolean) => void;
@@ -38,26 +37,9 @@ const ClubsSection = ({
   isLoading: boolean;
   clubMemberCounts: Record<string, number>;
   selectedClub: ReadingClub | null;
+  fetchClubEvaluations: (clubId: string) => Promise<void>;
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-
-  const fetchClubEvaluations = async (clubId: string) => {
-    setIsLoadingEvaluations(true);
-    try {
-      const records = await client.collection("surveys").getFullList<Survey>({
-        filter: `club_id = "${clubId}"`,
-        expand: "student_id",
-        sort: "-created",
-        requestKey: Math.random().toString(),
-      });
-      setEvaluations(records);
-    } catch (error) {
-      toast.error("حدث خطأ ما أثناء إستدعاء الإستبيانات");
-    } finally {
-      setIsLoadingEvaluations(false);
-    }
-  };
-
   const handleClubSelect = (club: ReadingClub) => {
     setSelectedClub(club);
     fetchClubEvaluations(club.id).then(() => setIsLoadingEvaluations(false));

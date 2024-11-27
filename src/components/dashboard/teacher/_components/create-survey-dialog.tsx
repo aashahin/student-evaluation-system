@@ -19,6 +19,7 @@ import { toast } from "sonner";
 type CreateSurveyDialogProps = {
   studentId: string;
   clubId: string;
+  fetchClubs: () => Promise<void>;
 };
 
 type Question = {
@@ -32,10 +33,11 @@ type FormattedQuestion = {
   rating: number;
 };
 
-export default function CreateSurveyDialog({
+const CreateSurveyDialog = ({
   studentId,
   clubId,
-}: CreateSurveyDialogProps) {
+  fetchClubs,
+}: CreateSurveyDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -109,6 +111,7 @@ export default function CreateSurveyDialog({
         },
       });
 
+      await fetchClubs();
       setOpen(false);
       toast.success("تم إضافة التقييم بنجاح.");
     } catch (error) {
@@ -149,6 +152,12 @@ export default function CreateSurveyDialog({
             <DrawerTitle className="text-xl sm:text-2xl font-bold text-center mb-4">
               نموذج التقييم
             </DrawerTitle>
+
+            {/* Add instructions */}
+            <p className="text-muted-foreground text-sm text-center mb-4">
+              يرجى تقييم كل سؤال على مقياس من 0 إلى 5 نجوم، حيث 5 هو الأفضل و 0
+              هو الأسوأ
+            </p>
 
             <div className="flex items-center gap-2 sm:gap-4 mb-6">
               <Progress value={progress} className="h-2" />
@@ -214,6 +223,19 @@ export default function CreateSurveyDialog({
                                             : "hover:text-primary/80"
                                         }
                                       `}
+                                      title={
+                                        rating === 0
+                                          ? "غير مرضي تماماً"
+                                          : rating === 1
+                                            ? "ضعيف جداً"
+                                            : rating === 2
+                                              ? "ضعيف"
+                                              : rating === 3
+                                                ? "متوسط"
+                                                : rating === 4
+                                                  ? "جيد"
+                                                  : "ممتاز"
+                                      }
                                     >
                                       <input
                                         type="radio"
@@ -315,4 +337,6 @@ export default function CreateSurveyDialog({
       </DrawerContent>
     </Drawer>
   );
-}
+};
+
+export default CreateSurveyDialog;

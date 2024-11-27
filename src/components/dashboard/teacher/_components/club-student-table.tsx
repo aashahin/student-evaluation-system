@@ -22,6 +22,7 @@ type ClubStudentTableProps = {
   clubMembers: User[];
   clubId: string;
   client: PocketBase;
+  fetchClubs: () => Promise<void>;
 };
 
 const ClubStudentTable = ({
@@ -31,6 +32,7 @@ const ClubStudentTable = ({
   isLoadingSurveys,
   clubId,
   client,
+  fetchClubs,
 }: ClubStudentTableProps) => {
   const [openSurveyDetails, setOpenSurveyDetails] = useState(false);
   const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null);
@@ -380,6 +382,7 @@ const ClubStudentTable = ({
                         <CreateSurveyDialog
                           studentId={member.id}
                           clubId={clubId}
+                          fetchClubs={fetchClubs}
                         />
                       </td>
                     </tr>
