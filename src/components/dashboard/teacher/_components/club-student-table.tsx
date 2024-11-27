@@ -13,13 +13,7 @@ import { Button } from "@/components/ui/button";
 import SurveyDetails from "@/components/dashboard/_components/survey-details";
 import CreateSurveyDialog from "@/components/dashboard/teacher/_components/create-survey-dialog";
 import PocketBase from "pocketbase";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { toast } from "sonner";
 
 type ClubStudentTableProps = {
   surveys: Survey[];
@@ -45,7 +39,6 @@ const ClubStudentTable = ({
   );
   const [openTeacherSurveys, setOpenTeacherSurveys] = useState(false);
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
-  const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
 
   useEffect(() => {
     const fetchMemberSurveys = async () => {
@@ -65,7 +58,7 @@ const ClubStudentTable = ({
 
         setMemberSurveys(surveysMap);
       } catch (error) {
-        console.error("Error fetching member surveys:", error);
+        toast.error("حدث خطأ ما أثناء إستدعاء إستبيانات الطلاب");
       }
     };
 
@@ -255,6 +248,28 @@ const ClubStudentTable = ({
                                         تقييم
                                       </span>
                                     </div>
+                                    {memberSurveys[member.id]?.length > 0 && (
+                                      <div className="bg-purple-50 px-4 py-2 rounded-full transition-all hover:bg-purple-100">
+                                        <span className="text-sm font-medium text-purple-700">
+                                          معدل التقييم:{" "}
+                                          {(
+                                            memberSurveys[member.id].reduce(
+                                              (acc, survey) => {
+                                                const surveyAvg =
+                                                  survey.questions.data.reduce(
+                                                    (sum, q) => sum + q.rating,
+                                                    0,
+                                                  ) /
+                                                  survey.questions.data.length;
+                                                return acc + surveyAvg;
+                                              },
+                                              0,
+                                            ) / memberSurveys[member.id].length
+                                          ).toFixed(1)}
+                                          /5
+                                        </span>
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="text-sm text-gray-600 flex items-center gap-2">
                                     <CalendarIcon className="w-4 h-4" />
@@ -275,54 +290,73 @@ const ClubStudentTable = ({
                               {/* Surveys List */}
                               <div className="overflow-y-auto px-1 flex-1 space-y-4 mt-4 custom-scrollbar">
                                 {memberSurveys[member.id]?.length > 0 ? (
-                                  [...memberSurveys[member.id]]
-                                    .sort((a, b) => {
-                                      const dateA = new Date(
-                                        a.created,
-                                      ).getTime();
-                                      const dateB = new Date(
-                                        b.created,
-                                      ).getTime();
-                                      return sortBy === "newest"
-                                        ? dateB - dateA
-                                        : dateA - dateB;
-                                    })
-                                    .map((survey) => (
-                                      <div
-                                        key={survey.id}
-                                        className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100
-                    hover:shadow-md hover:border-gray-200 transition-all duration-200"
-                                      >
-                                        <div className="flex flex-col sm:flex-row justify-between gap-4">
-                                          <div className="text-sm text-gray-600 flex items-center gap-2">
-                                            <CalendarIcon className="w-4 h-4" />
-                                            {new Date(
-                                              survey.created,
-                                            ).toLocaleDateString("ar-SA")}
-                                          </div>
+                                  [...memberSurveys[member.id]].map(
+                                    (survey) => {
+                                      const avgRating =
+                                        survey.questions.data.reduce(
+                                          (sum, q) => sum + q.rating,
+                                          0,
+                                        ) / survey.questions.data.length;
 
-                                          <Dialog>
-                                            <DialogTrigger asChild>
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200
-                              transition-all duration-200"
+                                      const getRatingColor = (
+                                        rating: number,
+                                      ) => {
+                                        if (rating >= 4)
+                                          return "bg-green-50 text-green-600 border-green-200";
+                                        if (rating >= 3)
+                                          return "bg-blue-50 text-blue-600 border-blue-200";
+                                        if (rating >= 2)
+                                          return "bg-yellow-50 text-yellow-600 border-yellow-200";
+                                        return "bg-red-50 text-red-600 border-red-200";
+                                      };
+
+                                      return (
+                                        <div
+                                          key={survey.id}
+                                          className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100
+                             hover:shadow-md hover:border-gray-200 transition-all duration-200"
+                                        >
+                                          <div className="flex flex-col sm:flex-row justify-between gap-4">
+                                            <div className="flex items-center gap-4">
+                                              <div className="text-sm text-gray-600 flex items-center gap-2">
+                                                <CalendarIcon className="w-4 h-4" />
+                                                {new Date(
+                                                  survey.created,
+                                                ).toLocaleDateString("ar-SA")}
+                                              </div>
+                                              <div
+                                                className={`px-3 py-1 rounded-full text-sm font-medium border ${getRatingColor(avgRating)}`}
                                               >
-                                                عرض التفاصيل
-                                              </Button>
-                                            </DialogTrigger>
-                                            <DialogContent className="bg-gray-50">
-                                              <DialogTitle>
-                                                تفاصيل التقييم
-                                              </DialogTitle>
-                                              <div className="mt-2 border-t border-gray-200" />
-                                              <SurveyDetails survey={survey} />
-                                            </DialogContent>
-                                          </Dialog>
+                                                {avgRating.toFixed(1)}/5
+                                              </div>
+                                            </div>
+
+                                            <Dialog>
+                                              <DialogTrigger asChild>
+                                                <Button
+                                                  variant="outline"
+                                                  size="sm"
+                                                  className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200
+                                     transition-all duration-200"
+                                                >
+                                                  عرض التفاصيل
+                                                </Button>
+                                              </DialogTrigger>
+                                              <DialogContent className="bg-gray-50">
+                                                <DialogTitle>
+                                                  تفاصيل التقييم
+                                                </DialogTitle>
+                                                <div className="mt-2 border-t border-gray-200" />
+                                                <SurveyDetails
+                                                  survey={survey}
+                                                />
+                                              </DialogContent>
+                                            </Dialog>
+                                          </div>
                                         </div>
-                                      </div>
-                                    ))
+                                      );
+                                    },
+                                  )
                                 ) : (
                                   <div className="text-center py-12">
                                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">

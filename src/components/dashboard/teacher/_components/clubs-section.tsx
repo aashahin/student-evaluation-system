@@ -52,7 +52,7 @@ const ClubsSection = ({
       });
       setEvaluations(records);
     } catch (error) {
-      console.error("Error fetching evaluations:", error);
+      toast.error("حدث خطأ ما أثناء إستدعاء الإستبيانات");
     } finally {
       setIsLoadingEvaluations(false);
     }
@@ -70,7 +70,6 @@ const ClubsSection = ({
       setSelectedClub(null);
       await fetchClubs();
     } catch (error) {
-      console.error("Error deleting club:", error);
       toast.error("حدث خطأ أثناء حذف النادي");
     }
   };

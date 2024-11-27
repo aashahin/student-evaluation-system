@@ -5,6 +5,7 @@ import { GradeLevel, ReadingClub, Survey, User } from "@/types/api";
 import { pb } from "@/lib/api";
 import ClubStudentCard from "@/components/dashboard/teacher/_components/club-student-card";
 import ClubsSection from "@/components/dashboard/teacher/_components/clubs-section";
+import { toast } from "sonner";
 
 export default function Clubs() {
   const [readingClubs, setReadingClubs] = useState<ReadingClub[]>([]);
@@ -42,7 +43,7 @@ export default function Clubs() {
       }
       setClubMemberCounts(counts);
     } catch (error) {
-      console.error("Error fetching member counts:", error);
+      toast.error("حدث خطأ ما أثناء إستدعاء الأعضاء");
     }
   };
 
@@ -55,7 +56,7 @@ export default function Clubs() {
         });
       setGradeLevels(records);
     } catch (error) {
-      console.error("Error fetching grade levels:", error);
+      toast.error("حدث خطأ ما أثناء إستدعاء المراحل");
     }
   };
 
@@ -74,7 +75,7 @@ export default function Clubs() {
       setReadingClubs(records);
       await fetchClubMemberCounts(records.map((club) => club.id));
     } catch (error) {
-      console.error("Error fetching reading clubs:", error);
+      toast.error("حدث خطأ ما أثناء إستدعاء النوادي");
     } finally {
       setIsLoading(false);
     }
