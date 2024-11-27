@@ -7,6 +7,7 @@ import ClubStudentTable from "@/components/dashboard/teacher/_components/club-st
 import PocketBase from "pocketbase";
 import { toast } from "sonner";
 import { calculateClubStats } from "@/stats/teacher";
+import ClubSettings from "@/components/dashboard/_components/club-settings";
 
 type ClubStudentCardProps = {
   selectedClub: ReadingClub;
@@ -84,10 +85,17 @@ const ClubStudentCard = ({
     <div className="bg-white shadow-lg rounded-xl p-6 space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
-          <FileText className="text-blue-600" />
-          {selectedClub.name}
-        </h2>
+        <div className="flex items-center gap-x-3">
+          <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+            <FileText className="text-blue-600" />
+            {selectedClub.name}
+          </h2>
+          <ClubSettings
+            club={selectedClub}
+            client={client}
+            onClubUpdated={fetchClubs}
+          />
+        </div>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <span className="bg-gray-50 px-4 py-2 rounded-full">
             تم الإنشاء:{" "}

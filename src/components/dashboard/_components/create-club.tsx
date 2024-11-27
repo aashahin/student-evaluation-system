@@ -52,7 +52,6 @@ const CreateClubDialog = ({
   const [formState, setFormState] = useState<FormState>(initialState);
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
     grade_level: "",
     max_members: "",
   });
@@ -94,15 +93,11 @@ const CreateClubDialog = ({
           : {
               max_members: 15,
             }),
-        ...(formData.description.length > 0 && {
-          description: formData.description,
-        }),
       });
 
       setOpen(false);
       setFormData({
         name: "",
-        description: "",
         grade_level: "",
         max_members: "",
       });
@@ -176,17 +171,6 @@ const CreateClubDialog = ({
                   )}
                 </AnimatePresence>
               )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description">وصف النادي</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                placeholder="أدخل الوصف المفصل حول النادي"
-              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="grade" className="flex">
