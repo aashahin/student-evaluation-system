@@ -1,15 +1,22 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Survey, User } from "@/types/api";
+import { Book, Survey, User } from "@/types/api";
 import { Loader } from "lucide-react";
-import CreateSurveyDialog from "@/components/dashboard/teacher/_components/create-survey-dialog";
 import PocketBase from "pocketbase";
 import { toast } from "sonner";
 import {
-  SurveysTeacherDetailsDialog,
-  SurveysDetailsDialog,
-} from "@/components/dashboard/teacher/_components/surveys-details-dialog";
+  SurveyTableHead,
+  SurveyTableRow,
+} from "@/components/dashboard/teacher/_components/table/surveys";
+import {
+  BookTableHead,
+  BookTableRow,
+} from "@/components/dashboard/teacher/_components/table/books";
+import {
+  MemberTableHead,
+  MemberTableRow,
+} from "@/components/dashboard/teacher/_components/table/members";
 
 type ClubStudentTableProps = {
   surveys: Survey[];
@@ -19,6 +26,10 @@ type ClubStudentTableProps = {
   clubId: string;
   client: PocketBase;
   fetchClubs: () => Promise<void>;
+  books: Book[];
+  isLoadingBooks: boolean;
+  onEditBook: (book: Book) => void;
+  fetchBooks: () => Promise<void>;
 };
 
 const ClubStudentTable = ({
@@ -29,6 +40,10 @@ const ClubStudentTable = ({
   clubId,
   client,
   fetchClubs,
+  books,
+  isLoadingBooks,
+  onEditBook,
+  fetchBooks,
 }: ClubStudentTableProps) => {
   const [openSurveyDetails, setOpenSurveyDetails] = useState(false);
   const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null);
@@ -65,7 +80,10 @@ const ClubStudentTable = ({
     }
   }, [activeTab, clubMembers, clubId, client]);
 
-  if (activeTab === "surveys" && isLoadingSurveys) {
+  if (
+    (activeTab === "surveys" && isLoadingSurveys) ||
+    (activeTab === "books" && isLoadingBooks)
+  ) {
     return (
       <div className="flex justify-center items-center p-12">
         <Loader className="animate-spin text-blue-600 w-8 h-8" />
@@ -81,137 +99,41 @@ const ClubStudentTable = ({
             <thead className="bg-gray-50">
               <tr>
                 {activeTab === "surveys" ? (
-                  <>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-start text-sm font-semibold text-gray-900 w-1/4"
-                    >
-                      اسم الطالب
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-center text-sm font-semibold text-gray-900"
-                    >
-                      نوع التقييم
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-center text-sm font-semibold text-gray-900"
-                    >
-                      تاريخ التقييم
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-center text-sm font-semibold text-gray-900"
-                    >
-                      تفاصيل التقييم
-                    </th>
-                  </>
+                  <SurveyTableHead />
+                ) : activeTab === "books" ? (
+                  <BookTableHead />
                 ) : (
-                  <>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-right text-sm font-semibold text-gray-900"
-                    >
-                      اسم الطالب
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-center text-sm font-semibold text-gray-900"
-                    >
-                      العمر
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-center text-sm font-semibold text-gray-900"
-                    >
-                      تاريخ الانضمام
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-center text-sm font-semibold text-gray-900"
-                    >
-                      عدد التقييمات
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-center text-sm font-semibold text-gray-900"
-                    >
-                      تقييم الطالب
-                    </th>
-                  </>
+                  <MemberTableHead />
                 )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {activeTab === "surveys"
-                ? surveys.map((survey) => (
-                    <tr
-                      key={survey.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {survey.expand?.student_id?.name ?? "غير معروف"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800">
-                          {survey.type === "self-assessment"
-                            ? "تقييم ذاتي"
-                            : survey.type === "teacher-assessment"
-                              ? "تقييم المعلم"
-                              : "تقييم ولي الأمر"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                        {new Date(survey.created).toLocaleDateString("ar-SA")}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <SurveysDetailsDialog
-                          openSurveyDetails={openSurveyDetails}
-                          setOpenSurveyDetails={setOpenSurveyDetails}
-                          selectedSurvey={selectedSurvey}
-                          setSelectedSurvey={setSelectedSurvey}
-                          survey={survey}
-                          key={survey.id}
-                        />
-                      </td>
-                    </tr>
-                  ))
-                : clubMembers.map((member) => (
-                    <tr
-                      key={member.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {member.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                        {member.age === 0 ? "غير محدد" : member.age}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                        {new Date(member.created).toLocaleDateString("ar-SA")}
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 text-center">
-                        <SurveysTeacherDetailsDialog
-                          openTeacherSurveys={openTeacherSurveys}
-                          setOpenTeacherSurveys={setOpenTeacherSurveys}
-                          selectedMember={selectedMember}
-                          setSelectedMember={setSelectedMember}
-                          member={member}
-                          memberSurveys={memberSurveys}
-                          key={member.id}
-                        />
-                      </td>
-
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <CreateSurveyDialog
-                          studentId={member.id}
-                          clubId={clubId}
-                          fetchClubs={fetchClubs}
-                        />
-                      </td>
-                    </tr>
-                  ))}
+              {activeTab === "surveys" ? (
+                SurveyTableRow({
+                  surveys,
+                  selectedSurvey,
+                  setSelectedSurvey,
+                  openSurveyDetails,
+                  setOpenSurveyDetails,
+                })
+              ) : activeTab === "books" ? (
+                <BookTableRow
+                  books={books}
+                  fetchBooks={fetchBooks}
+                  onEdit={onEditBook}
+                />
+              ) : (
+                <MemberTableRow
+                  members={clubMembers}
+                  selectedMember={selectedMember}
+                  setSelectedMember={setSelectedMember}
+                  openTeacherSurveys={openTeacherSurveys}
+                  setOpenTeacherSurveys={setOpenTeacherSurveys}
+                  memberSurveys={memberSurveys}
+                  clubId={clubId}
+                  fetchClubs={fetchClubs}
+                />
+              )}
             </tbody>
           </table>
 
@@ -223,6 +145,11 @@ const ClubStudentTable = ({
           {activeTab === "surveys" && surveys.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               لا توجد تقييمات حالياً
+            </div>
+          )}
+          {activeTab === "books" && books.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              لا توجد كتب حالياً
             </div>
           )}
         </div>

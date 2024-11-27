@@ -33,11 +33,10 @@ export type GradeLevel = {
 export type Book = {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   author?: string;
-  cover_image?: string;
   page_count?: number;
-  discussion_date: string;
+  discussion_date: Date;
   club_id: string;
   teacher_id: string;
   created: string;

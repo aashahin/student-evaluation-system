@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { Award, BookIcon, FileText, TrendingUp, Users } from "lucide-react";
-import { ReadingBook, ReadingClub, Survey, User } from "@/types/api";
+import { Book, ReadingBook, ReadingClub, Survey, User } from "@/types/api";
 import ClubStudentTable from "@/components/dashboard/teacher/_components/club-student-table";
 import PocketBase from "pocketbase";
 import { toast } from "sonner";
 import { calculateClubStats } from "@/stats/teacher";
 import ClubSettings from "@/components/dashboard/_components/club-settings";
+import CreateBookDialog from "@/components/dashboard/teacher/_components/create-book";
+import EditBookDialog from "@/components/dashboard/teacher/_components/edit-book";
 
 type ClubStudentCardProps = {
   selectedClub: ReadingClub;
@@ -19,6 +21,7 @@ type ClubStudentCardProps = {
 };
 
 const TABS = [
+  { id: "books", label: "الكتب", icon: BookIcon },
   { id: "surveys", label: "تقييمات الطلاب", icon: Award },
   { id: "members", label: "أعضاء النادي", icon: Users },
 ];
@@ -51,18 +54,38 @@ const ClubStudentCard = ({
   client,
   fetchClubs,
 }: ClubStudentCardProps) => {
-  const [activeTab, setActiveTab] = useState("surveys");
-  const [books, setBooks] = useState<ReadingBook[]>([]);
+  const [activeTab, setActiveTab] = useState("books");
+  const [readBooks, setReadBooks] = useState<ReadingBook[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [isLoadingBooks, setIsLoadingBooks] = useState(false);
+  const [bookToEdit, setBookToEdit] = useState<Book | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const fetchBooks = async () => {
+  const fetchReadBooks = async () => {
+    setIsLoadingBooks(true);
     try {
       const booksData = await client
         .collection("reading_books")
-        .getList<ReadingBook>(1, 50, {
+        .getFullList<ReadingBook>({
           filter: `club_id = "${selectedClub.id}" && is_read = true`,
           requestKey: Math.random().toString(),
         });
-      setBooks(booksData.items);
+      setReadBooks(booksData);
+    } catch (error) {
+      toast.error("حدث خطأ أثناء الحصول على الكتب المقروءة للمجموعة");
+    } finally {
+      setIsLoadingBooks(false);
+    }
+  };
+
+  const fetchBooks = async () => {
+    try {
+      const booksData = await client.collection("books").getFullList<Book>({
+        filter: `club_id = "${selectedClub.id}"`,
+        sort: "-created",
+        requestKey: Math.random().toString(),
+      });
+      setBooks(booksData);
     } catch (error) {
       toast.error("حدث خطأ أثناء الحصول على الكتب المقروءة للمجموعة");
     }
@@ -70,6 +93,7 @@ const ClubStudentCard = ({
 
   useEffect(() => {
     if (selectedClub) {
+      fetchReadBooks();
       fetchBooks();
     }
   }, [selectedClub]);
@@ -78,8 +102,13 @@ const ClubStudentCard = ({
     surveys,
     clubMembers || [],
     selectedClub.max_members,
-    books,
+    readBooks,
   );
+
+  const handleEditBook = (book: Book) => {
+    setBookToEdit(book);
+    setIsEditDialogOpen(true);
+  };
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-6 space-y-8">
@@ -147,6 +176,10 @@ const ClubStudentCard = ({
         ))}
       </div>
 
+      {activeTab === "books" && (
+        <CreateBookDialog clubId={selectedClub.id} fetchBooks={fetchBooks} />
+      )}
+
       <ClubStudentTable
         activeTab={activeTab}
         surveys={surveys}
@@ -155,7 +188,19 @@ const ClubStudentCard = ({
         clubId={selectedClub.id}
         client={client}
         fetchClubs={fetchClubs}
+        books={books}
+        isLoadingBooks={isLoadingBooks}
+        fetchBooks={fetchBooks}
+        onEditBook={handleEditBook}
       />
+      {bookToEdit !== null && (
+        <EditBookDialog
+          book={bookToEdit}
+          fetchBooks={fetchBooks}
+          open={isEditDialogOpen}
+          setOpen={setIsEditDialogOpen}
+        />
+      )}
     </div>
   );
 };

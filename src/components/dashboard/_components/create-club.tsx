@@ -23,7 +23,6 @@ import {
 import { Plus } from "lucide-react";
 import { pb } from "@/lib/api";
 import { GradeLevel } from "@/types/api";
-import { Textarea } from "@/components/ui/textarea";
 import { AnimatePresence, motion } from "framer-motion";
 
 type CreateClubDialogProps = {
