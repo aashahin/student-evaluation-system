@@ -4,15 +4,15 @@ const nextConfig: NextConfig = {
   experimental: {
     reactCompiler: true,
     ppr: true,
+    esmExternals: "loose",
     turbo: {
       rules: {
-        // Handle .node files
-        "**/*.node": {
+        "*.node": {
           loaders: ["raw-loader"],
+          as: "*.js",
         },
       },
     },
-    esmExternals: "loose",
   },
 };
 
