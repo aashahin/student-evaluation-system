@@ -5,10 +5,6 @@ import { Guide as GuideType } from "@/types/api";
 import { pb } from "@/lib/api";
 import { toast } from "sonner";
 import { FileText, Download, Eye, X, RefreshCw } from "lucide-react";
-import { Worker, Viewer } from "@react-pdf-viewer/core";
-import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
 export default function Guide({ type }: { type: string }) {
   const [guide, setGuide] = useState<GuideType>();
@@ -20,8 +16,6 @@ export default function Guide({ type }: { type: string }) {
     name: string;
   } | null>(null);
   const client = pb();
-
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   const fetchGuide = useCallback(async () => {
     setIsLoading(true);
@@ -187,13 +181,11 @@ export default function Guide({ type }: { type: string }) {
                 </button>
               </div>
               <div className="flex-1 overflow-hidden">
-                <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-                  <Viewer
-                    fileUrl={`${process.env.NEXT_PUBLIC_POCKETBASE_API_URL}/api/files/guides/${selectedFile.id}/${selectedFile.url}`}
-                    plugins={[defaultLayoutPluginInstance]}
-                    defaultScale={1}
-                  />
-                </Worker>
+                <iframe
+                  src={`${process.env.NEXT_PUBLIC_POCKETBASE_API_URL}/api/files/guides/${selectedFile.id}/${selectedFile.url}`}
+                  className="w-full h-full"
+                  title={selectedFile.name}
+                />
               </div>
             </div>
           </div>
