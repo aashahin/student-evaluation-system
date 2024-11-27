@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { GradeLevel, ReadingClub, Survey, User } from "@/types/api";
 import { pb } from "@/lib/api";
 import ClubStudentCard from "@/components/dashboard/teacher/_components/club-student-card";
@@ -20,34 +20,33 @@ export default function Clubs() {
   const [clubMembers, setClubMembers] = useState<Record<string, User[]>>({});
   const client = pb();
 
-  useEffect(() => {
-    fetchClubs().then(() => fetchGradeLevels());
-  }, []);
-
-  const fetchClubMemberCounts = async (clubIds: string[]) => {
-    try {
-      const counts: Record<string, number> = {};
-      for (const clubId of clubIds) {
-        const records = await client
-          .collection("reading_club_members")
-          .getFullList({
-            filter: `club_id = "${clubId}"`,
-            requestKey: Math.random().toString(),
-            expand: "user_id",
-          });
-        counts[clubId] = records.length;
-        setClubMembers((prevClubMembers) => ({
-          ...prevClubMembers,
-          [clubId]: records.map((item) => item.expand?.user_id),
-        }));
+  const fetchClubMemberCounts = useCallback(
+    async (clubIds: string[]) => {
+      try {
+        const counts: Record<string, number> = {};
+        for (const clubId of clubIds) {
+          const records = await client
+            .collection("reading_club_members")
+            .getFullList({
+              filter: `club_id = "${clubId}"`,
+              requestKey: Math.random().toString(),
+              expand: "user_id",
+            });
+          counts[clubId] = records.length;
+          setClubMembers((prevClubMembers) => ({
+            ...prevClubMembers,
+            [clubId]: records.map((item) => item.expand?.user_id),
+          }));
+        }
+        setClubMemberCounts(counts);
+      } catch (error) {
+        toast.error("حدث خطأ ما أثناء إستدعاء الأعضاء");
       }
-      setClubMemberCounts(counts);
-    } catch (error) {
-      toast.error("حدث خطأ ما أثناء إستدعاء الأعضاء");
-    }
-  };
+    },
+    [client],
+  );
 
-  const fetchGradeLevels = async () => {
+  const fetchGradeLevels = useCallback(async () => {
     try {
       const records = await client
         .collection("grade_levels")
@@ -58,9 +57,9 @@ export default function Clubs() {
     } catch (error) {
       toast.error("حدث خطأ ما أثناء إستدعاء المراحل");
     }
-  };
+  }, [client]);
 
-  const fetchClubs = async () => {
+  const fetchClubs = useCallback(async () => {
     setIsLoading(true);
     try {
       const teacherId = client.authStore.record?.id;
@@ -79,7 +78,11 @@ export default function Clubs() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [client, fetchClubMemberCounts]);
+
+  useEffect(() => {
+    fetchClubs().then(() => fetchGradeLevels());
+  }, [fetchClubs, fetchGradeLevels]);
 
   const fetchClubEvaluations = async (clubId: string) => {
     setIsLoadingEvaluations(true);

@@ -54,3 +54,33 @@ body {
   }
 }
 
+.scrollarea {
+  overflow-y: auto;
+  overflow-x: auto;
+  max-height: 300px;
+}
+
+.scrollarea:hover {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(217.2 91.2% 59.8%) hsl(0 0% 100%);
+}
+
+/* Webkit-based browsers */
+.scrollarea::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollarea::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.scrollarea::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.scrollarea::-webkit-scrollbar-track {
+  background: #f4f4f4;
+  border-radius: 10px;
+}

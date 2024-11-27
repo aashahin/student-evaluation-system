@@ -87,7 +87,7 @@ const CreateSurveyDialog = ({
     };
 
     getQuestions();
-  }, []);
+  }, [client]);
 
   const handleRatingChange = (questionIndex: number, value: number) => {
     setFormattedAnswers((prev) => {
