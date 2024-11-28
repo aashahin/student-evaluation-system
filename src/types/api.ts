@@ -83,3 +83,14 @@ export type Guide = {
   created: string;
   updated: string;
 };
+
+export type Discussion = {
+  id: string;
+  club_id: string;
+  student_id: string;
+  book_id: string;
+  discussion_date: Date;
+  attended: boolean;
+  created: string;
+  updated: string;
+};

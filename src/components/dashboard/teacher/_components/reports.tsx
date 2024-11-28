@@ -1,10 +1,35 @@
 "use client";
 
-import { BarChart2, BookOpen, TrendingUp, Users } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import {
+  BarChart2,
+  BookOpen,
+  Users,
+  RefreshCw,
+  Info,
+  MessageCircleMoreIcon,
+} from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import UpcomingDiscussions from "./upcoming-discussions";
 import { pb } from "@/lib/api";
-import { ReadingBook, ReadingClub, Survey, User } from "@/types/api";
+import {
+  Discussion,
+  ReadingBook,
+  ReadingClub,
+  Survey,
+  User,
+} from "@/types/api";
+import {
+  calculateActiveParticipants,
+  calculateParticipationTrend,
+} from "@/stats/metrics";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 
 type Metrics = {
   currentMembers: number;
@@ -13,7 +38,11 @@ type Metrics = {
   averageBooksPerStudent: number;
   activeParticipants: number;
   participationTrend: number;
+  discussionAttendance: number;
+  totalDiscussions: number;
 };
+
+type Period = "year" | "semester" | "month";
 
 export default function Reports() {
   const [metrics, setMetrics] = useState<Metrics>({
@@ -23,19 +52,21 @@ export default function Reports() {
     averageBooksPerStudent: 0,
     activeParticipants: 0,
     participationTrend: 0,
+    discussionAttendance: 0,
+    totalDiscussions: 0,
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState<Period>("year");
 
   const client = pb();
 
-  useEffect(() => {
-    fetchMetrics();
-  }, []);
-
-  const fetchMetrics = async () => {
+  const fetchMetrics = useCallback(async () => {
     try {
+      setIsLoading(true);
+      setError(null);
+
       const teacherId = client.authStore.record?.id;
-      const currentDate = new Date();
-      const yearStart = new Date(currentDate.getFullYear(), 8, 1); // September 1st
 
       // Fetch teacher's clubs
       const clubs = await client
@@ -69,10 +100,12 @@ export default function Reports() {
         requestKey: Math.random().toString(),
       });
 
-      // Calculate metrics
+      // Calculate metrics based on selected period
+      const periodStart = getPeriodStartDate(period);
+
       const currentMembers = members.length;
       const yearStartMembers = members.filter(
-        (member) => new Date(member.created) <= yearStart,
+        (member) => new Date(member.created) <= periodStart,
       ).length;
 
       const totalBooksRead = readingBooks.filter((book) => book.is_read).length;
@@ -81,14 +114,26 @@ export default function Reports() {
           ? Number((totalBooksRead / currentMembers).toFixed(1))
           : 0;
 
-      // Calculate active participants (students who participated in >75% of discussions)
       const activeParticipants = calculateActiveParticipants(members, surveys);
-
-      // Calculate participation trend
       const participationTrend = calculateParticipationTrend(
         surveys,
-        yearStart,
+        periodStart,
       );
+
+      const discussions = await client
+        .collection("discussions")
+        .getFullList<Discussion>({
+          filter: clubIds.map((id) => `club_id = "${id}"`).join("||"),
+          sort: "discussion_date",
+          requestKey: Math.random().toString(),
+        });
+
+      const totalDiscussions = discussions.length;
+      const attendedDiscussions = discussions.filter((d) => d.attended).length;
+      const discussionAttendance =
+        totalDiscussions > 0
+          ? Math.round((attendedDiscussions / totalDiscussions) * 100)
+          : 0;
 
       setMetrics({
         currentMembers,
@@ -97,140 +142,134 @@ export default function Reports() {
         averageBooksPerStudent,
         activeParticipants,
         participationTrend,
+        discussionAttendance,
+        totalDiscussions,
       });
     } catch (error) {
       console.error("Error fetching metrics:", error);
+      setError("حدث خطأ أثناء تحميل البيانات");
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [client, period]);
+
+  useEffect(() => {
+    fetchMetrics().finally(() => setIsLoading(false));
+  }, [fetchMetrics, period]);
 
   return (
-    <div className="grid md:grid-cols-2 gap-8">
-      <div className="bg-white shadow-lg rounded-xl p-8">
-        <h2 className="text-2xl font-bold mb-8 flex items-center gap-3 text-gray-800">
-          <BarChart2 className="text-blue-600 w-6 h-6" />
-          التقرير السنوي
-        </h2>
+    <div className="grid lg:grid-cols-2 gap-6">
+      {isLoading ? (
+        <StatsLoadingSkeleton />
+      ) : error ? (
+        <ErrorMessage message={error} />
+      ) : (
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl w-full font-semibold flex items-center gap-2 text-gray-900">
+              <BarChart2 className="text-blue-500 w-5 h-5" />
+              التقرير السنوي
+            </h2>
+            <div className="flex items-center gap-4">
+              <Select
+                value={period}
+                onValueChange={(e) => setPeriod(e as Period)}
+              >
+                <SelectTrigger>الفترة</SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="year">سنوي</SelectItem>
+                  <SelectItem value="semester">فصلي</SelectItem>
+                  <SelectItem value="month">شهري</SelectItem>
+                </SelectContent>
+              </Select>
+              <button
+                onClick={() => fetchMetrics()}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                title="تحديث البيانات"
+              >
+                <RefreshCw className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+          </div>
 
-        <div className="space-y-8">
-          {/* Members Card */}
-          <MetricCard
-            icon={<Users className="w-5 h-5 text-blue-600" />}
-            title="عدد المشاركين"
-            metrics={[
-              {
-                label: "العدد الحالي",
-                value: metrics.currentMembers,
-                color: "text-blue-600",
-                trend:
-                  metrics.currentMembers > metrics.yearStartMembers
-                    ? "up"
-                    : "down",
-              },
-              {
-                label: "بداية السنة",
-                value: metrics.yearStartMembers,
-                color: "text-blue-600",
-              },
-            ]}
-          />
-
-          {/* Books Card */}
-          <MetricCard
-            icon={<BookOpen className="w-5 h-5 text-green-600" />}
-            title="الكتب المقروءة"
-            metrics={[
-              {
-                label: "إجمالي الكتب",
-                value: metrics.totalBooksRead,
-                color: "text-green-600",
-              },
-              {
-                label: "المعدل لكل طالب",
-                value: metrics.averageBooksPerStudent,
-                color: "text-green-600",
-                suffix: " كتاب",
-              },
-            ]}
-          />
-
-          {/* Participation Card */}
-          <MetricCard
-            icon={<TrendingUp className="w-5 h-5 text-purple-600" />}
-            title="المشاركة في المناقشات"
-            metrics={[
-              {
-                label: "المشاركون النشطون",
-                value: metrics.activeParticipants,
-                color: "text-purple-600",
-              },
-              {
-                label: "نسبة التغير",
-                value: Math.abs(metrics.participationTrend),
-                color:
-                  metrics.participationTrend >= 0
-                    ? "text-green-600"
-                    : "text-red-600",
-                prefix: metrics.participationTrend >= 0 ? "+" : "-",
-                suffix: "%",
-              },
-            ]}
-          />
+          <div className="grid sm:grid-cols-2 gap-4">
+            {getStatsConfig(metrics).map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <StatsCard {...stat} />
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <UpcomingDiscussions />
     </div>
   );
 }
 
-type MetricCardProps = {
+type StatsCardProps = {
   icon: React.ReactNode;
   title: string;
-  metrics: {
+  info?: string;
+  stats: {
     label: string;
     value: number;
-    color: string;
     prefix?: string;
     suffix?: string;
-    trend?: "up" | "down";
+    change?: number;
   }[];
 };
 
-function MetricCard({ icon, title, metrics }: MetricCardProps) {
+function StatsCard({ icon, title, info, stats }: StatsCardProps) {
   return (
-    <div className="bg-gray-50 p-6 rounded-xl transition-all">
-      <div className="flex items-center gap-2 mb-4">
-        {icon}
-        <h4 className="font-semibold text-gray-700">{title}</h4>
+    <div className="bg-white rounded-xl p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-lg bg-gray-50">{icon}</div>
+          <h3 className="text-base font-semibold text-gray-800">{title}</h3>
+        </div>
+        {info && (
+          <Tooltip.Provider>
+            <Tooltip.Root>
+              <Tooltip.Trigger>
+                <Info className="w-4 h-4 text-gray-400" />
+              </Tooltip.Trigger>
+              <Tooltip.Content className="bg-gray-900 text-white p-2 rounded text-sm">
+                {info}
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
+        )}
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        {metrics.map((metric, index) => (
-          <div
-            key={index}
-            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all"
-          >
-            <p className="text-gray-600 text-sm mb-2">{metric.label}</p>
-            <div className="flex items-center gap-1">
-              {metric.prefix && (
-                <span className={`text-2xl font-bold ${metric.color}`}>
-                  {metric.prefix}
-                </span>
-              )}
-              <span className={`text-2xl font-bold ${metric.color}`}>
-                {metric.value}
+
+      <div className="space-y-4">
+        {stats.map((stat, index) => (
+          <div key={index} className="group">
+            <p className="text-sm text-gray-600 mb-1 group-hover:text-gray-900 transition-colors">
+              {stat.label}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-amber-600">
+                {stat.value}
               </span>
-              {metric.suffix && (
-                <span className={`text-lg ${metric.color}`}>
-                  {metric.suffix}
-                </span>
+              {stat.suffix && (
+                <span className="text-xl text-amber-600">{stat.suffix}</span>
               )}
-              {metric.trend && (
+              {stat.change !== undefined && (
                 <span
-                  className={`ml-2 ${
-                    metric.trend === "up" ? "text-green-500" : "text-red-500"
-                  }`}
+                  className={`text-sm font-medium me-2 ${
+                    stat.change >= 0
+                      ? "text-emerald-600 bg-emerald-50"
+                      : "text-red-600 bg-red-50"
+                  } px-2 py-1 rounded-full`}
                 >
-                  {metric.trend === "up" ? "↑" : "↓"}
+                  {stat.change >= 0 ? "+" : "-"}
+                  {Math.abs(stat.change)}
                 </span>
               )}
             </div>
@@ -241,40 +280,106 @@ function MetricCard({ icon, title, metrics }: MetricCardProps) {
   );
 }
 
-function calculateActiveParticipants(
-  members: User[],
-  surveys: Survey[],
-): number {
-  const participationThreshold = 0.75;
-  let activeCount = 0;
-
-  members.forEach((member) => {
-    const memberSurveys = surveys.filter(
-      (survey) => survey.student_id === member.id,
-    );
-    if (memberSurveys.length / surveys.length >= participationThreshold) {
-      activeCount++;
-    }
-  });
-
-  return activeCount;
+function StatsLoadingSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-gray-100 rounded-xl p-6 h-40"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function calculateParticipationTrend(
-  surveys: Survey[],
-  yearStart: Date,
-): number {
-  const firstHalfSurveys = surveys.filter(
-    (survey) =>
-      new Date(survey.created) <
-      new Date(yearStart.getTime() + (Date.now() - yearStart.getTime()) / 2),
-  ).length;
-
-  const secondHalfSurveys = surveys.length - firstHalfSurveys;
-
-  if (firstHalfSurveys === 0) return 0;
-
-  return Math.round(
-    ((secondHalfSurveys - firstHalfSurveys) / firstHalfSurveys) * 100,
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+      {message}
+    </div>
   );
+}
+
+function getPeriodStartDate(period: Period): Date {
+  const now = new Date();
+  switch (period) {
+    case "month":
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+    case "semester":
+      return new Date(now.getFullYear(), now.getMonth() >= 6 ? 6 : 0, 1);
+    case "year":
+      return new Date(now.getFullYear(), 0, 1);
+  }
+}
+
+function getStatsConfig(metrics: Metrics) {
+  return [
+    {
+      icon: <Users className="w-4 h-4 text-blue-500" />,
+      title: "عدد المشاركين",
+      info: "إجمالي عدد الطلاب المشاركين في النوادي",
+      stats: [
+        {
+          label: "العدد الحالي",
+          value: metrics.currentMembers,
+          change: metrics.currentMembers - metrics.yearStartMembers,
+        },
+        {
+          label: "بداية الفترة",
+          value: metrics.yearStartMembers,
+        },
+      ],
+    },
+    {
+      icon: <BookOpen className="w-4 h-4 text-emerald-500" />,
+      title: "الكتب المقروءة",
+      info: "إحصائيات الكتب المقروءة خلال الفترة المحددة",
+      stats: [
+        {
+          label: "إجمالي الكتب",
+          value: metrics.totalBooksRead,
+        },
+        {
+          label: "المعدل لكل طالب",
+          value: metrics.averageBooksPerStudent,
+          suffix: "كتاب",
+        },
+      ],
+    },
+    {
+      icon: <Users className="w-5 h-5 text-amber-500" />,
+      title: "المشاركة في الإستبيانات",
+      info: "إحصائيات المشاركة في الإستبيانات",
+      stats: [
+        {
+          label: "المشاركون النشطون",
+          value: metrics.activeParticipants,
+        },
+        {
+          label: "نسبة التغيير",
+          value: Math.abs(metrics.participationTrend),
+          suffix: "%",
+        },
+      ],
+    },
+    {
+      icon: <MessageCircleMoreIcon className="w-5 h-5 text-indigo-500" />,
+      title: "حضور المناقشات",
+      info: "إحصائيات الطلاب الذين حضروا المناقشات",
+      stats: [
+        {
+          label: "نسبة الحضور",
+          value: metrics.discussionAttendance,
+          suffix: "%",
+        },
+        {
+          label: "عدد المناقشات",
+          value: metrics.totalDiscussions,
+        },
+      ],
+    },
+  ];
 }
