@@ -227,7 +227,7 @@ type StatsCardProps = {
 
 function StatsCard({ icon, title, info, stats }: StatsCardProps) {
   return (
-    <div className="bg-white rounded-xl p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
+    <div className="bg-white rounded-xl p-4 hover:shadow-md transition-all duration-200 border border-gray-200">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-lg bg-gray-50">{icon}</div>
