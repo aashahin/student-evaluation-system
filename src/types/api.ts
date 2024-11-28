@@ -91,6 +91,10 @@ export type Discussion = {
   book_id: string;
   discussion_date: Date;
   attended: boolean;
+  expand?: {
+    book_id?: Book;
+    student_id?: User;
+  };
   created: string;
   updated: string;
 };

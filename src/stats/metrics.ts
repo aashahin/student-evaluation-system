@@ -1,5 +1,16 @@
 import { Survey, User } from "@/types/api";
 
+export type Metrics = {
+  currentMembers: number;
+  yearStartMembers: number;
+  totalBooksRead: number;
+  averageBooksPerStudent: number;
+  activeParticipants: number;
+  participationTrend: number;
+  discussionAttendance: number;
+  totalDiscussions: number;
+};
+
 export function calculateActiveParticipants(
   members: User[],
   surveys: Survey[],

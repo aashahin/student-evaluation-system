@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  BarChart2,
-  BookOpen,
-  Users,
-  RefreshCw,
-  Info,
-  MessageCircleMoreIcon,
-} from "lucide-react";
+import { BarChart2, RefreshCw } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import * as Tooltip from "@radix-ui/react-tooltip";
 import UpcomingDiscussions from "./upcoming-discussions";
 import { pb } from "@/lib/api";
 import {
@@ -23,6 +15,7 @@ import {
 import {
   calculateActiveParticipants,
   calculateParticipationTrend,
+  Metrics,
 } from "@/stats/metrics";
 import {
   Select,
@@ -30,17 +23,8 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-
-type Metrics = {
-  currentMembers: number;
-  yearStartMembers: number;
-  totalBooksRead: number;
-  averageBooksPerStudent: number;
-  activeParticipants: number;
-  participationTrend: number;
-  discussionAttendance: number;
-  totalDiscussions: number;
-};
+import { StatsCard } from "@/components/dashboard/teacher/_components/stats/state-card";
+import { getStatsConfig } from "@/components/dashboard/teacher/_components/stats/stats-config";
 
 type Period = "year" | "semester" | "month";
 
@@ -146,7 +130,6 @@ export default function Reports() {
         totalDiscussions,
       });
     } catch (error) {
-      console.error("Error fetching metrics:", error);
       setError("حدث خطأ أثناء تحميل البيانات");
     } finally {
       setIsLoading(false);
@@ -159,6 +142,8 @@ export default function Reports() {
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
+      <UpcomingDiscussions />
+
       {isLoading ? (
         <StatsLoadingSkeleton />
       ) : error ? (
@@ -206,76 +191,6 @@ export default function Reports() {
           </div>
         </div>
       )}
-
-      <UpcomingDiscussions />
-    </div>
-  );
-}
-
-type StatsCardProps = {
-  icon: React.ReactNode;
-  title: string;
-  info?: string;
-  stats: {
-    label: string;
-    value: number;
-    prefix?: string;
-    suffix?: string;
-    change?: number;
-  }[];
-};
-
-function StatsCard({ icon, title, info, stats }: StatsCardProps) {
-  return (
-    <div className="bg-white rounded-xl p-4 hover:shadow-md transition-all duration-200 border border-gray-200">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-lg bg-gray-50">{icon}</div>
-          <h3 className="text-base font-semibold text-gray-800">{title}</h3>
-        </div>
-        {info && (
-          <Tooltip.Provider>
-            <Tooltip.Root>
-              <Tooltip.Trigger>
-                <Info className="w-4 h-4 text-gray-400" />
-              </Tooltip.Trigger>
-              <Tooltip.Content className="bg-gray-900 text-white p-2 rounded text-sm">
-                {info}
-              </Tooltip.Content>
-            </Tooltip.Root>
-          </Tooltip.Provider>
-        )}
-      </div>
-
-      <div className="space-y-4">
-        {stats.map((stat, index) => (
-          <div key={index} className="group">
-            <p className="text-sm text-gray-600 mb-1 group-hover:text-gray-900 transition-colors">
-              {stat.label}
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-amber-600">
-                {stat.value}
-              </span>
-              {stat.suffix && (
-                <span className="text-xl text-amber-600">{stat.suffix}</span>
-              )}
-              {stat.change !== undefined && (
-                <span
-                  className={`text-sm font-medium me-2 ${
-                    stat.change >= 0
-                      ? "text-emerald-600 bg-emerald-50"
-                      : "text-red-600 bg-red-50"
-                  } px-2 py-1 rounded-full`}
-                >
-                  {stat.change >= 0 ? "+" : "-"}
-                  {Math.abs(stat.change)}
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -313,73 +228,4 @@ function getPeriodStartDate(period: Period): Date {
     case "year":
       return new Date(now.getFullYear(), 0, 1);
   }
-}
-
-function getStatsConfig(metrics: Metrics) {
-  return [
-    {
-      icon: <Users className="w-4 h-4 text-blue-500" />,
-      title: "عدد المشاركين",
-      info: "إجمالي عدد الطلاب المشاركين في النوادي",
-      stats: [
-        {
-          label: "العدد الحالي",
-          value: metrics.currentMembers,
-          change: metrics.currentMembers - metrics.yearStartMembers,
-        },
-        {
-          label: "بداية الفترة",
-          value: metrics.yearStartMembers,
-        },
-      ],
-    },
-    {
-      icon: <BookOpen className="w-4 h-4 text-emerald-500" />,
-      title: "الكتب المقروءة",
-      info: "إحصائيات الكتب المقروءة خلال الفترة المحددة",
-      stats: [
-        {
-          label: "إجمالي الكتب",
-          value: metrics.totalBooksRead,
-        },
-        {
-          label: "المعدل لكل طالب",
-          value: metrics.averageBooksPerStudent,
-          suffix: "كتاب",
-        },
-      ],
-    },
-    {
-      icon: <Users className="w-5 h-5 text-amber-500" />,
-      title: "المشاركة في الإستبيانات",
-      info: "إحصائيات المشاركة في الإستبيانات",
-      stats: [
-        {
-          label: "المشاركون النشطون",
-          value: metrics.activeParticipants,
-        },
-        {
-          label: "نسبة التغيير",
-          value: Math.abs(metrics.participationTrend),
-          suffix: "%",
-        },
-      ],
-    },
-    {
-      icon: <MessageCircleMoreIcon className="w-5 h-5 text-indigo-500" />,
-      title: "حضور المناقشات",
-      info: "إحصائيات الطلاب الذين حضروا المناقشات",
-      stats: [
-        {
-          label: "نسبة الحضور",
-          value: metrics.discussionAttendance,
-          suffix: "%",
-        },
-        {
-          label: "عدد المناقشات",
-          value: metrics.totalDiscussions,
-        },
-      ],
-    },
-  ];
 }
