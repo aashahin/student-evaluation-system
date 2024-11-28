@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Award, BookIcon, FileText, TrendingUp, Users } from "lucide-react";
 import { Book, ReadingBook, ReadingClub, Survey, User } from "@/types/api";
 import ClubStudentTable from "@/components/dashboard/teacher/_components/club-student-table";
@@ -22,8 +22,8 @@ type ClubStudentCardProps = {
 
 const TABS = [
   { id: "books", label: "الكتب", icon: BookIcon },
-  { id: "surveys", label: "تقييمات الطلاب", icon: Award },
-  { id: "members", label: "أعضاء النادي", icon: Users },
+  { id: "surveys", label: "التقييمات", icon: Award },
+  { id: "members", label: "الأعضاء", icon: Users },
 ];
 
 const StatCard = ({
@@ -61,7 +61,7 @@ const ClubStudentCard = ({
   const [bookToEdit, setBookToEdit] = useState<Book | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const fetchReadBooks = async () => {
+  const fetchReadBooks = useCallback(async () => {
     setIsLoadingBooks(true);
     try {
       const booksData = await client
@@ -76,9 +76,9 @@ const ClubStudentCard = ({
     } finally {
       setIsLoadingBooks(false);
     }
-  };
+  }, [client, selectedClub]);
 
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     try {
       const booksData = await client.collection("books").getFullList<Book>({
         filter: `club_id = "${selectedClub.id}"`,
@@ -89,14 +89,14 @@ const ClubStudentCard = ({
     } catch (error) {
       toast.error("حدث خطأ أثناء الحصول على الكتب المقروءة للمجموعة");
     }
-  };
+  }, [client, selectedClub]);
 
   useEffect(() => {
     if (selectedClub) {
       fetchReadBooks();
       fetchBooks();
     }
-  }, [selectedClub]);
+  }, [fetchBooks, fetchReadBooks, selectedClub]);
 
   const stats = calculateClubStats(
     surveys,

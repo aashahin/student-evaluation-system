@@ -53,7 +53,6 @@ const EditBookDialog = ({
     }
   }, [book, open]);
 
-  // Reset form when dialog closes
   const handleClose = () => {
     setOpen(false);
     setFormData({
