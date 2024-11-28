@@ -142,8 +142,6 @@ export default function Reports() {
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
-      <UpcomingDiscussions />
-
       {isLoading ? (
         <StatsLoadingSkeleton />
       ) : error ? (
@@ -191,6 +189,8 @@ export default function Reports() {
           </div>
         </div>
       )}
+
+      <UpcomingDiscussions />
     </div>
   );
 }
