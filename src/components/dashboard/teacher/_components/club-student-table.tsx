@@ -92,9 +92,9 @@ const ClubStudentTable = ({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200">
-      <div className="min-w-full inline-block align-middle max-w-[80vw] sm:max-w-full">
-        <div className="overflow-scroll scrollarea">
+    <div className="overflow-x-auto rounded-xl border border-gray-200">
+      <div className="min-w-full inline-block align-middle max-w-[80vw]">
+        <div className="scrollarea">
           <table className="min-w-full divide-y divide-gray-200 table-fixed">
             <thead className="bg-gray-50">
               <tr>

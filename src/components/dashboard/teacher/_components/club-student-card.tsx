@@ -111,7 +111,7 @@ const ClubStudentCard = ({
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-6 space-y-8">
+    <div className="bg-white shadow-lg rounded-xl p-6 space-y-8 overflow-x-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
         <div className="flex items-center gap-x-3">
@@ -155,7 +155,7 @@ const ClubStudentCard = ({
         />
       </div>
 
-      <div className="flex gap-4 border-b">
+      <div className="flex gap-4 border-b overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.id}
