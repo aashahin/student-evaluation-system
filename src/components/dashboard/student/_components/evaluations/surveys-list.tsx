@@ -33,7 +33,10 @@ const SurveysList = ({
         <h2 className="text-xl font-semibold">قائمة التقييمات</h2>
       </div>
 
-      <div className="divide-y divide-gray-100 scrollarea">
+      <div
+        className="divide-y divide-gray-100 scrollarea"
+        style={{ maxHeight: "400px" }}
+      >
         {isLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>

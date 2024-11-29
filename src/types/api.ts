@@ -113,3 +113,12 @@ export type EvaluationBookCard = {
     }[];
   };
 };
+
+export type Utils = {
+  id: string;
+  key: string;
+  value?: string;
+  file?: string;
+  created: string;
+  updated: string;
+};

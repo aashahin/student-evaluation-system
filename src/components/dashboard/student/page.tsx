@@ -5,6 +5,9 @@ import { BookOpen, FileText, BookMarked, UserCheck } from "lucide-react";
 import Header from "@/components/dashboard/teacher/_components/header";
 import dynamic from "next/dynamic";
 import { pb } from "@/lib/api";
+import { Utils } from "@/types/api";
+import { ClientResponseError } from "pocketbase";
+import ReaderToolkit from "@/components/dashboard/student/_components/reader-toolkit";
 
 const ReadingMaterials = dynamic(
   () => import("@/components/dashboard/student/_components/reading-materials"),
@@ -87,16 +90,6 @@ const StudentDashboard = () => {
         {activeTab === "guide" && <Guides type="student" />}
       </div>
     </>
-  );
-};
-
-// Reader Toolkit Component
-const ReaderToolkit = () => {
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-right">حقيبة القارئ</h2>
-      {/* Add content for reader toolkit */}
-    </div>
   );
 };
 
