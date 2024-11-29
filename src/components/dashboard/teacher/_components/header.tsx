@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Book, Menu, UserCircle, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import UpdateAccountDialog from "@/components/dashboard/_components/update-user";
 import { pb } from "@/lib/api";
@@ -27,8 +27,14 @@ const Header = ({
   setActiveTab: (tab: string) => void;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const client = pb();
   const user = client.authStore.record;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const onSignOut = () => {
     client.authStore.clear();
     document.cookie = "pb_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
@@ -39,7 +45,7 @@ const Header = ({
     setIsMenuOpen(!isMenuOpen);
   };
 
-  if (!user) {
+  if (!mounted || !user) {
     return null;
   }
 
@@ -49,11 +55,11 @@ const Header = ({
         <header className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <Book className="text-blue-600" />
-            لوحة معلومات المعلم
+            لوحة المعلم
           </h1>
 
           {/* Desktop Navigation */}
-          <div className="hidden sm:flex gap-4 items-center">
+          <nav className="hidden sm:flex gap-4 items-center">
             <div className="flex bg-gray-100/50 rounded-xl p-1.5">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -82,7 +88,6 @@ const Header = ({
               })}
             </div>
 
-            {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost">
@@ -111,7 +116,7 @@ const Header = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </nav>
 
           {/* Mobile Menu Button */}
           <button
@@ -128,7 +133,7 @@ const Header = ({
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="sm:hidden mt-4 pb-4">
+          <nav className="sm:hidden mt-4 pb-4">
             <div className="flex flex-col space-y-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -159,7 +164,6 @@ const Header = ({
                 );
               })}
 
-              {/* Mobile User Menu */}
               <div className="pt-2 border-t">
                 <div className="px-4 py-2">
                   <p className="font-medium">{user.name}</p>
@@ -175,7 +179,7 @@ const Header = ({
                 </Button>
               </div>
             </div>
-          </div>
+          </nav>
         )}
       </div>
     </div>
