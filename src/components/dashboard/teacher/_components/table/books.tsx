@@ -1,6 +1,6 @@
 import React from "react";
 import { Book, Discussion, User } from "@/types/api";
-import { Edit2, Search, Trash2 } from "lucide-react";
+import { Edit2, Loader, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -23,7 +23,6 @@ import { useState } from "react";
 import { pb } from "@/lib/api";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 
 const BookTableHead = () => (
   <>
@@ -160,7 +159,7 @@ const BookTableRow = ({
       {books.map((book) => (
         <tr key={book.id} className="hover:bg-gray-50 transition-colors">
           <td
-            className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600"
+            className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 underline decoration-dotted underline-offset-4"
             onClick={() => {
               setSelectedBook(book);
               setAttendanceDialogOpen(true);
@@ -225,7 +224,7 @@ const BookTableRow = ({
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              <Loader className="animate-spin text-blue-600" />
             </div>
           ) : (
             <div className="space-y-4">
@@ -245,9 +244,9 @@ const BookTableRow = ({
               >
                 <div className="grid grid-cols-2 gap-4">
                   {filteredStudents?.map((student) => (
-                    <Card
+                    <div
                       key={student.id}
-                      className={`p-4 transition-colors ${
+                      className={`p-4 transition-colors border border-gray-200 rounded-xl shadow-sm ${
                         isStudentAttended(student.id)
                           ? "bg-green-50 border-green-200"
                           : "hover:bg-gray-50"
@@ -270,7 +269,7 @@ const BookTableRow = ({
                           {student.name}
                         </label>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
               </div>

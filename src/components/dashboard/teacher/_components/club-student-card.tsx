@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Award, BookIcon, FileText, TrendingUp, Users } from "lucide-react";
+import {
+  Award,
+  BookIcon,
+  FileText,
+  TrendingUp,
+  Users,
+  ArrowRight,
+} from "lucide-react";
 import { Book, ReadingBook, ReadingClub, Survey, User } from "@/types/api";
 import ClubStudentTable from "@/components/dashboard/teacher/_components/club-student-table";
 import PocketBase from "pocketbase";
@@ -18,6 +25,7 @@ type ClubStudentCardProps = {
   clubMembers: User[];
   client: PocketBase;
   fetchClubs: () => Promise<void>;
+  onBack?: () => void;
 };
 
 const TABS = [
@@ -53,6 +61,7 @@ const ClubStudentCard = ({
   clubMembers,
   client,
   fetchClubs,
+  onBack,
 }: ClubStudentCardProps) => {
   const [activeTab, setActiveTab] = useState("books");
   const [readBooks, setReadBooks] = useState<ReadingBook[]>([]);
@@ -112,6 +121,17 @@ const ClubStudentCard = ({
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-6 space-y-8 overflow-x-auto">
+      {/* Back button for mobile */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="md:hidden mb-4 flex items-center text-gray-600 hover:text-gray-800"
+        >
+          <ArrowRight className="w-5 h-5 ml-1" />
+          العودة للنوادي
+        </button>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
         <div className="flex items-center gap-x-3">

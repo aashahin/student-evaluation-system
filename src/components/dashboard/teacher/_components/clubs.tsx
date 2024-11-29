@@ -102,34 +102,65 @@ export default function Clubs() {
   };
 
   return (
-    <div className="grid md:grid-cols-2 gap-4">
-      <ClubsSection
-        readingClubs={readingClubs}
-        setSelectedClub={setSelectedClub}
-        gradeLevels={gradeLevels}
-        fetchClubs={fetchClubs}
-        setIsLoadingEvaluations={setIsLoadingEvaluations}
-        client={client}
-        isLoading={isLoading}
-        clubMemberCounts={clubMemberCounts}
-        selectedClub={selectedClub}
-        fetchClubEvaluations={fetchClubEvaluations}
-      />
+    <>
+      {/* Mobile View */}
+      <div className="md:hidden">
+        {selectedClub ? (
+          <ClubStudentCard
+            selectedClub={selectedClub}
+            surveys={evaluations}
+            isLoadingSurveys={isLoadingEvaluations}
+            clubMembers={clubMembers[selectedClub.id]}
+            client={client}
+            fetchClubs={fetchClubs}
+            onBack={() => setSelectedClub(null)}
+          />
+        ) : (
+          <ClubsSection
+            readingClubs={readingClubs}
+            setSelectedClub={setSelectedClub}
+            gradeLevels={gradeLevels}
+            fetchClubs={fetchClubs}
+            setIsLoadingEvaluations={setIsLoadingEvaluations}
+            client={client}
+            isLoading={isLoading}
+            clubMemberCounts={clubMemberCounts}
+            selectedClub={selectedClub}
+            fetchClubEvaluations={fetchClubEvaluations}
+          />
+        )}
+      </div>
 
-      {selectedClub ? (
-        <ClubStudentCard
-          selectedClub={selectedClub}
-          surveys={evaluations}
-          isLoadingSurveys={isLoadingEvaluations}
-          clubMembers={clubMembers[selectedClub.id]}
-          client={client}
+      {/* Desktop View */}
+      <div className="hidden md:grid md:grid-cols-2 gap-4">
+        <ClubsSection
+          readingClubs={readingClubs}
+          setSelectedClub={setSelectedClub}
+          gradeLevels={gradeLevels}
           fetchClubs={fetchClubs}
+          setIsLoadingEvaluations={setIsLoadingEvaluations}
+          client={client}
+          isLoading={isLoading}
+          clubMemberCounts={clubMemberCounts}
+          selectedClub={selectedClub}
+          fetchClubEvaluations={fetchClubEvaluations}
         />
-      ) : (
-        <div className="bg-white shadow rounded-xl p-6 flex items-center justify-center text-gray-500">
-          اختر ناديًا لعرض التفاصيل
-        </div>
-      )}
-    </div>
+
+        {selectedClub ? (
+          <ClubStudentCard
+            selectedClub={selectedClub}
+            surveys={evaluations}
+            isLoadingSurveys={isLoadingEvaluations}
+            clubMembers={clubMembers[selectedClub.id]}
+            client={client}
+            fetchClubs={fetchClubs}
+          />
+        ) : (
+          <div className="bg-white shadow rounded-xl p-6 flex items-center justify-center text-gray-500">
+            اختر ناديًا لعرض التفاصيل
+          </div>
+        )}
+      </div>
+    </>
   );
 }

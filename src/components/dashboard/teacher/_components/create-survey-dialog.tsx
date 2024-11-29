@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { pb } from "@/lib/api";
 import { Check, ChevronLeft, ChevronRight, Loader, Star } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { AnimatePresence, motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -180,7 +179,7 @@ const CreateSurveyDialog = ({
                   transition={{ duration: 0.2 }}
                 >
                   {questions[currentStep] && (
-                    <Card className="p-4 sm:p-6 relative overflow-hidden">
+                    <div className="p-4 sm:p-6 relative overflow-hidden border border-gray-200 rounded-xl shadow-sm">
                       <div className="absolute top-0 left-0 w-1 sm:w-2 h-full bg-primary" />
 
                       <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-primary flex items-center gap-2">
@@ -282,7 +281,7 @@ const CreateSurveyDialog = ({
                           },
                         )}
                       </div>
-                    </Card>
+                    </div>
                   )}
                 </motion.div>
               </AnimatePresence>
