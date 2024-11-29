@@ -121,6 +121,8 @@ const ClubStudentTable = ({
                   books={books}
                   fetchBooks={fetchBooks}
                   onEdit={onEditBook}
+                  clubId={clubId}
+                  clubMembers={clubMembers}
                 />
               ) : (
                 <MemberTableRow
