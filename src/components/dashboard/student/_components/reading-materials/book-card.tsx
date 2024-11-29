@@ -8,7 +8,7 @@ import {
   CheckCircle,
   ClipboardEdit,
 } from "lucide-react";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import EvaluationDialog from "./evaluation-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -109,6 +109,7 @@ const BookCard = ({
             alt={book.title}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
             layout="fill"
+            priority
           />
           {isRead && (
             <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-[2] transition-all duration-300">

@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { PlusCircle, Upload, X } from "lucide-react";
 import { pb } from "@/lib/api";
-import Image from "next/image";
+import Image from "next/legacy/image";
 
 type CreateBookDialogProps = {
   clubId: string;

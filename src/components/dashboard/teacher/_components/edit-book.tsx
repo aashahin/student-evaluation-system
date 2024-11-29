@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Upload, X } from "lucide-react";
 import { pb } from "@/lib/api";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import { Book } from "@/types/api";
 
 type EditBookDialogProps = {
