@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BookOpen, FileText, BookMarked, UserCheck } from "lucide-react";
 import Header from "@/components/dashboard/teacher/_components/header";
 import dynamic from "next/dynamic";
+import { pb } from "@/lib/api";
 
 const ReadingMaterials = dynamic(
   () => import("@/components/dashboard/student/_components/reading-materials"),
@@ -52,6 +53,17 @@ const tabs = [
 
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState("reading-materials");
+  const [mounted, setMounted] = useState(false);
+  const client = pb();
+  const studentId = client.authStore.record?.id;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!studentId || !mounted) {
+    return null;
+  }
 
   return (
     <>

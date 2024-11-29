@@ -38,7 +38,7 @@ const SurveyDetails = ({ survey }: { survey: Survey }) => {
     <>
       {/* Header Section */}
       <div className="sticky top-0 z-10 p-4 rounded-xl shadow-sm border bg-white">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row gap-4 md-gap-0 items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
             الأسئلة والتقييمات
           </h2>
