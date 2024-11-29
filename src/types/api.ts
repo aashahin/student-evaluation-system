@@ -3,7 +3,7 @@ export type User = {
   name: string;
   email: string;
   password: string;
-  role: string;
+  role: string; // admin, student, parent, teacher
   age: number;
   performance?: JSON;
   created: string;
