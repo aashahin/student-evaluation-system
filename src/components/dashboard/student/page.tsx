@@ -3,8 +3,29 @@
 import React, { useState } from "react";
 import { BookOpen, FileText, BookMarked, UserCheck } from "lucide-react";
 import Header from "@/components/dashboard/teacher/_components/header";
-import Guide from "@/components/dashboard/_components/guides";
-import ReadingMaterials from "@/components/dashboard/student/_components/reading-materials";
+import dynamic from "next/dynamic";
+
+const ReadingMaterials = dynamic(
+  () => import("@/components/dashboard/student/_components/reading-materials"),
+  {
+    ssr: false,
+  },
+);
+const Evaluations = dynamic(
+  () =>
+    import(
+      "@/components/dashboard/student/_components/evaluations/evaluations"
+    ),
+  {
+    ssr: false,
+  },
+);
+const Guides = dynamic(
+  () => import("@/components/dashboard/_components/guides"),
+  {
+    ssr: false,
+  },
+);
 
 const tabs = [
   {
@@ -13,14 +34,14 @@ const tabs = [
     icon: BookOpen,
   },
   {
-    id: "reader-toolkit",
-    label: "حقيبة القارئ",
-    icon: BookMarked,
-  },
-  {
     id: "evaluations",
     label: "نماذج التقييم",
     icon: FileText,
+  },
+  {
+    id: "reader-toolkit",
+    label: "حقيبة القارئ",
+    icon: BookMarked,
   },
   {
     id: "guide",
@@ -43,9 +64,9 @@ const StudentDashboard = () => {
 
       <div className="container mx-auto px-4 sm:px-6 py-8">
         {activeTab === "reading-materials" && <ReadingMaterials />}
-        {activeTab === "reader-toolkit" && <ReaderToolkit />}
         {activeTab === "evaluations" && <Evaluations />}
-        {activeTab === "guide" && <Guide type="student" />}
+        {activeTab === "reader-toolkit" && <ReaderToolkit />}
+        {activeTab === "guide" && <Guides type="student" />}
       </div>
     </>
   );
@@ -57,29 +78,6 @@ const ReaderToolkit = () => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-right">حقيبة القارئ</h2>
       {/* Add content for reader toolkit */}
-    </div>
-  );
-};
-
-// Evaluations Component
-const Evaluations = () => {
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-right">نماذج التقييم</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h3 className="text-xl font-semibold mb-4 text-right">
-            بطاقة تقييم الكتاب
-          </h3>
-          {/* Add book evaluation form */}
-        </div>
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h3 className="text-xl font-semibold mb-4 text-right">
-            نموذج التقييم الذاتي
-          </h3>
-          {/* Add self-assessment form */}
-        </div>
-      </div>
     </div>
   );
 };

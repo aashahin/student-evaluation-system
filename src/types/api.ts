@@ -99,3 +99,14 @@ export type Discussion = {
   created: string;
   updated: string;
 };
+
+export type EvaluationBookCard = {
+  id: string;
+  grade_level: string;
+  data: {
+    data: {
+      title: string;
+      type: "rating" | "boolean" | "textarea" | "input";
+    }[];
+  };
+};
