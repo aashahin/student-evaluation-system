@@ -17,6 +17,7 @@ const Header = ({
   tabs,
   activeTab,
   setActiveTab,
+  title,
 }: {
   tabs: Array<{
     id: string;
@@ -25,6 +26,7 @@ const Header = ({
   }>;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  title: string;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -55,7 +57,7 @@ const Header = ({
         <header className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <Book className="text-blue-600" />
-            لوحة المعلم
+            {title}
           </h1>
 
           {/* Desktop Navigation */}
@@ -100,7 +102,7 @@ const Header = ({
                   <span className="font-medium">{user.name}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground overflow-hidden overflow-ellipsis">
                     {user.email}
                   </span>
                 </DropdownMenuItem>

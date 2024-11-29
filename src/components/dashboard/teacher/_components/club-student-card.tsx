@@ -10,13 +10,35 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Book, ReadingBook, ReadingClub, Survey, User } from "@/types/api";
-import ClubStudentTable from "@/components/dashboard/teacher/_components/club-student-table";
 import PocketBase from "pocketbase";
 import { toast } from "sonner";
 import { calculateClubStats } from "@/stats/teacher";
-import ClubSettings from "@/components/dashboard/_components/club-settings";
-import CreateBookDialog from "@/components/dashboard/teacher/_components/create-book";
-import EditBookDialog from "@/components/dashboard/teacher/_components/edit-book";
+import dynamic from "next/dynamic";
+
+const CreateBookDialog = dynamic(
+  () => import("@/components/dashboard/teacher/_components/create-book"),
+  {
+    ssr: false,
+  },
+);
+const EditBookDialog = dynamic(
+  () => import("@/components/dashboard/teacher/_components/edit-book"),
+  {
+    ssr: false,
+  },
+);
+const ClubSettings = dynamic(
+  () => import("@/components/dashboard/_components/club-settings"),
+  {
+    ssr: false,
+  },
+);
+const ClubStudentTable = dynamic(
+  () => import("@/components/dashboard/teacher/_components/club-student-table"),
+  {
+    ssr: false,
+  },
+);
 
 type ClubStudentCardProps = {
   selectedClub: ReadingClub;

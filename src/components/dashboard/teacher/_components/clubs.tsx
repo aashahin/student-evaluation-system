@@ -3,9 +3,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { GradeLevel, ReadingClub, Survey, User } from "@/types/api";
 import { pb } from "@/lib/api";
-import ClubStudentCard from "@/components/dashboard/teacher/_components/club-student-card";
+import dynamic from "next/dynamic";
 import ClubsSection from "@/components/dashboard/teacher/_components/clubs-section";
 import { toast } from "sonner";
+
+const ClubStudentCard = dynamic(
+  () => import("@/components/dashboard/teacher/_components/club-student-card"),
+  {
+    ssr: false,
+  },
+);
 
 export default function Clubs() {
   const [readingClubs, setReadingClubs] = useState<ReadingClub[]>([]);

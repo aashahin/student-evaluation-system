@@ -2,10 +2,27 @@
 
 import React, { useState } from "react";
 import { BookOpen, FileText, HelpCircle } from "lucide-react";
-import Reports from "@/components/dashboard/teacher/_components/reports";
-import Clubs from "@/components/dashboard/teacher/_components/clubs";
 import Header from "@/components/dashboard/teacher/_components/header";
-import Guide from "@/components/dashboard/_components/guides";
+import dynamic from "next/dynamic";
+
+const Clubs = dynamic(
+  () => import("@/components/dashboard/teacher/_components/clubs"),
+  {
+    ssr: false,
+  },
+);
+const Reports = dynamic(
+  () => import("@/components/dashboard/teacher/_components/reports"),
+  {
+    ssr: false,
+  },
+);
+const Guide = dynamic(
+  () => import("@/components/dashboard/_components/guides"),
+  {
+    ssr: false,
+  },
+);
 
 const tabs = [
   {
@@ -30,7 +47,12 @@ const TeacherDashboard = () => {
 
   return (
     <>
-      <Header tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header
+        tabs={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        title="لوحة المعلم"
+      />
 
       <div className="container mx-auto px-4 sm:px-6 py-8">
         {activeTab === "clubs" && <Clubs />}
