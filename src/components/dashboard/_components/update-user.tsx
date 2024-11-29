@@ -84,7 +84,7 @@ const UpdateAccountDialog = ({ user }: UpdateAccountDialogProps) => {
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          className="w-full flex justify-start sm:p-0 sm:h-8"
+          className="w-full flex justify-start sm:p-0 sm:h-8 font-normal"
           onClick={() => setOpen(true)}
         >
           تعديل الحساب

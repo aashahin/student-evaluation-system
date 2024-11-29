@@ -5,6 +5,7 @@ export type User = {
   password: string;
   role: string; // admin, student, parent, teacher
   age: number;
+  secret_key: string;
   club_id?: string;
   grade_level?: string;
   student_id?: string;

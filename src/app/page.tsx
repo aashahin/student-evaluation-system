@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { serverPB } from "@/lib/api";
 import TeacherDashboard from "@/components/dashboard/teacher/page";
 import StudentDashboard from "@/components/dashboard/student/page";
+import ParentDashboard from "@/components/dashboard/parent/page";
 
 export default async function Home() {
   const cookieStore = await cookies();
@@ -13,10 +14,6 @@ export default async function Home() {
   } else if (role === "student") {
     return <StudentDashboard />;
   } else {
-    return (
-      <div>
-        <h1>Home</h1>
-      </div>
-    );
+    return <ParentDashboard />;
   }
 }
