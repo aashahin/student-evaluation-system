@@ -50,6 +50,9 @@ export type ReadingBook = {
   student_id: string;
   club_id: string;
   is_read: boolean;
+  expand?: {
+    book_id?: Book;
+  };
   created: string;
   updated: string;
 };

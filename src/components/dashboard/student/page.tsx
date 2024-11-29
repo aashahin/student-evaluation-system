@@ -56,12 +56,18 @@ const StudentDashboard = () => {
   const [mounted, setMounted] = useState(false);
   const client = pb();
   const studentId = client.authStore.record?.id;
+  const clubId = client.authStore.record?.club_id;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!studentId || !mounted) {
+    return null;
+  }
+
+  if (!clubId) {
+    // update this
     return null;
   }
 

@@ -1,8 +1,10 @@
 import React, { useCallback } from "react";
 import { pb } from "@/lib/api";
-import { Survey, SurveyType } from "@/types/api";
-import { StarIcon, TrendingUpIcon } from "lucide-react";
+import { Discussion, Survey, SurveyType } from "@/types/api";
+import { Book, CalendarIcon, StarIcon, TrendingUpIcon } from "lucide-react";
 import SurveysList from "@/components/dashboard/student/_components/evaluations/surveys-list";
+import { toast } from "sonner";
+import DiscussionSurveyDialog from "@/components/dashboard/student/_components/evaluations/create-survey";
 
 const surveyTypeLabels: Record<SurveyType, string> = {
   "self-assessment": "تقييم ذاتي",
@@ -18,9 +20,11 @@ const surveyTypeStyles: Record<SurveyType, string> = {
 
 const Evaluations = () => {
   const [surveys, setSurveys] = React.useState<Survey[]>([]);
+  const [discussions, setDiscussions] = React.useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const client = pb();
   const studentId = client.authStore.record?.id;
+  const clubId = client.authStore.record?.club_id;
 
   const fetchSurveys = useCallback(async () => {
     try {
@@ -32,19 +36,34 @@ const Evaluations = () => {
       });
       setSurveys(surveys);
     } catch (error) {
-      console.error("Error fetching surveys:", error);
+      toast.error("حدث خطأ أثناء الحصول على التقييمات للطلاب");
     } finally {
       setIsLoading(false);
+    }
+  }, [client, studentId]);
+
+  const fetchDiscussions = useCallback(async () => {
+    try {
+      const discussions = await client
+        .collection("discussions")
+        .getFullList<Discussion>({
+          filter: `student_id = "${studentId}" && attended = true && survey_done = false`,
+          sort: "-created",
+          requestKey: Math.random().toString(),
+          expand: "book_id",
+        });
+      setDiscussions(discussions);
+    } catch (error) {
+      toast.error("حدث خطأ أثناء الحصول على الكتاب المقروء للطلاب");
     }
   }, [client, studentId]);
 
   React.useEffect(() => {
     if (studentId) {
       fetchSurveys();
+      fetchDiscussions();
     }
-  }, [fetchSurveys, studentId]);
-
-  if (!studentId) return null;
+  }, [fetchDiscussions, fetchSurveys, studentId]);
 
   const calculateStats = () => {
     if (surveys.length === 0) return null;
@@ -117,6 +136,53 @@ const Evaluations = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Survey For Discussion */}
+      {discussions.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold mb-4">تقييم النقاشات</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {discussions.map((book) => {
+              return (
+                <div
+                  key={book.id}
+                  className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
+                >
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-primary/10 rounded-full shrink-0">
+                        <Book className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="font-semibold text-gray-900">
+                          {book.expand?.book_id?.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <CalendarIcon className="w-4 h-4" />
+                          <span>
+                            تم النقاش في{" "}
+                            {new Date(
+                              book.expand!.book_id!.discussion_date,
+                            ).toLocaleDateString("ar-SA")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <DiscussionSurveyDialog
+                      studentId={studentId!}
+                      clubId={clubId}
+                      fetchSurveys={fetchSurveys}
+                      discussionId={book.id}
+                      fetchDiscussions={fetchDiscussions}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
