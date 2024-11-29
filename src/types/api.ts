@@ -6,6 +6,8 @@ export type User = {
   role: string; // admin, student, parent, teacher
   age: number;
   club_id?: string;
+  grade_level?: string;
+  student_id?: string;
   performance?: JSON;
   created: string;
   updated: string;

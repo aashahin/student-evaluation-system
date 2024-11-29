@@ -5,9 +5,8 @@ import { BookOpen, FileText, BookMarked, UserCheck } from "lucide-react";
 import Header from "@/components/dashboard/teacher/_components/header";
 import dynamic from "next/dynamic";
 import { pb } from "@/lib/api";
-import { Utils } from "@/types/api";
-import { ClientResponseError } from "pocketbase";
 import ReaderToolkit from "@/components/dashboard/student/_components/reader-toolkit";
+import SetupWizard from "@/components/dashboard/student/_components/setup-wizard";
 
 const ReadingMaterials = dynamic(
   () => import("@/components/dashboard/student/_components/reading-materials"),
@@ -60,6 +59,7 @@ const StudentDashboard = () => {
   const client = pb();
   const studentId = client.authStore.record?.id;
   const clubId = client.authStore.record?.club_id;
+  const grade_level = client.authStore.record?.grade_level;
 
   useEffect(() => {
     setMounted(true);
@@ -69,9 +69,15 @@ const StudentDashboard = () => {
     return null;
   }
 
-  if (!clubId) {
-    // update this
-    return null;
+  if (!clubId || !grade_level) {
+    return (
+      <SetupWizard
+        studentId={studentId}
+        onComplete={() => {
+          window.location.reload();
+        }}
+      />
+    );
   }
 
   return (

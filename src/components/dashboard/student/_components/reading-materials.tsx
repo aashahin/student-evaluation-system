@@ -10,6 +10,7 @@ import StatsSection, {
   LoadingSkeleton,
   SearchBar,
 } from "@/components/dashboard/student/_components/reading-materials/stats-sections";
+import { toast } from "sonner";
 
 export type FilterType = "all" | "read" | "unread";
 
@@ -46,7 +47,7 @@ const ReadingMaterials = () => {
         setBooks(booksResponse.items);
         setReadingStatus(readingStatusResponse.items);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        toast.error("حدث خطأ أثناء تحميل المواد المقروءة");
       } finally {
         setIsLoading(false);
       }
@@ -72,7 +73,7 @@ const ReadingMaterials = () => {
         });
       setReadingStatus(updatedStatus.items);
     } catch (error) {
-      console.error("Error marking book as read:", error);
+      toast.error("حدث خطأ أثناء تحديث حالة الكتاب");
     }
   };
 

@@ -128,7 +128,7 @@ const UpdateAccountDialog = ({ user }: UpdateAccountDialogProps) => {
               <Input
                 type="number"
                 id="age"
-                value={formData.age}
+                value={formData.age || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, age: Number(e.target.value) })
                 }

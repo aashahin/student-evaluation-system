@@ -52,7 +52,6 @@ const EvaluationDialog = ({
           );
         setQuestions(response);
       } catch (error) {
-        console.error("Error fetching questions:", error);
         toast.error("حدث خطأ في تحميل الأسئلة");
       } finally {
         setIsLoading(false);
@@ -91,7 +90,6 @@ const EvaluationDialog = ({
       setCurrentStep(0);
       setAnswers({});
     } catch (error) {
-      console.error("Error submitting evaluation:", error);
       toast.error("حدث خطأ في حفظ التقييم");
     } finally {
       setIsSubmitting(false);
