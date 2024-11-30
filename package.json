@@ -26,8 +26,8 @@
     "clsx": "^2.1.1",
     "framer-motion": "12.0.0-alpha.1",
     "lucide-react": "^0.460.0",
-    "next": "^15.0.4-canary.29",
-    "pocketbase": "^0.22.0",
+    "next": "^15.0.4-canary.32",
+    "pocketbase": "^0.22.1",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "sonner": "^1.7.0",
@@ -36,10 +36,10 @@
     "vaul": "^1.1.1"
   },
   "devDependencies": {
-    "@types/node": "^20.17.8",
+    "@types/node": "^20.17.9",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "eslint": "^9.15.0",
+    "eslint": "^9.16.0",
     "eslint-config-next": "15.0.3",
     "postcss": "^8.4.49",
     "prettier": "^3.4.1",

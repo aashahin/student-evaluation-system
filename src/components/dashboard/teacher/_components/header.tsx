@@ -30,18 +30,18 @@ import {
 import { User } from "@/types/api";
 import { RecordModel } from "pocketbase";
 
-interface Tab {
+type Tab = {
   id: string;
   label: string;
   icon: React.FC<React.ComponentProps<"svg">>;
-}
+};
 
-interface HeaderProps {
+type HeaderProps = {
   tabs: Tab[];
   activeTab: string;
   setActiveTab: (tab: string) => void;
   title: string;
-}
+};
 
 const Header: React.FC<HeaderProps> = ({
   tabs,

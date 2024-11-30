@@ -1,12 +1,12 @@
 import React from "react";
 import type { Metadata } from "next";
 import "./globals.css";
-import { IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Almarai } from "next/font/google";
 import { Toaster } from "sonner";
 
-const fontFamily = IBM_Plex_Sans_Arabic({
+const fontFamily = Almarai({
   subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "700"],
   display: "swap",
   fallback: ["sans-serif"],
 });

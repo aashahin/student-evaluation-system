@@ -155,7 +155,7 @@ const ParentSetupWizard = ({ onComplete }: SetupWizardProps) => {
                 <p className="font-medium">معلومات الطالب:</p>
                 <p>{studentData.name}</p>
                 <p className="text-gray-500">
-                  رقم الطالب: {studentData.student_id}
+                  رقم الطالب: {studentData.id}
                 </p>{" "}
               </div>
             )}

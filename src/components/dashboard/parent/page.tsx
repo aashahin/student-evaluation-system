@@ -10,7 +10,7 @@ import SetupWizard from "@/components/dashboard/parent/_components/setup-wizard"
 const Evaluations = dynamic(
   () =>
     import(
-      "@/components/dashboard/student/_components/evaluations/evaluations"
+      "@/components/dashboard/parent/_components/evaluations"
     ),
   {
     ssr: false,

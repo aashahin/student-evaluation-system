@@ -5,12 +5,12 @@ import { ClientResponseError } from "pocketbase";
 import { toast } from "sonner";
 import { BookMarked, Download, Eye, RefreshCw, X } from "lucide-react";
 
-interface ReaderToolkitState {
+type ReaderToolkitState = {
   file: string;
   loading: boolean;
   isModalOpen: boolean;
   fileType: string;
-}
+};
 
 const ReaderToolkit = () => {
   const client = pb();
@@ -150,10 +150,10 @@ const ReaderToolkit = () => {
   );
 };
 
-interface ModalProps {
+type ModalProps = {
   file: string;
   onClose: () => void;
-}
+};
 
 const Modal = ({ file, onClose }: ModalProps) => (
   <div className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm">
