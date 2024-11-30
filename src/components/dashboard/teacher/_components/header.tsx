@@ -10,8 +10,6 @@ import {
 import {
   AlertCircle,
   Book,
-  Check,
-  Copy,
   Eye,
   EyeOff,
   Menu,
@@ -295,24 +293,15 @@ const CredentialsDisplay: React.FC<{
   user: User | RecordModel;
   showKey: boolean;
   setShowKey: (show: boolean) => void;
-  copied: boolean;
-  onCopy: (text: string) => void;
-}> = ({ user, showKey, setShowKey, copied, onCopy }) => (
+}> = ({ user, showKey, setShowKey }) => (
   <div className="space-y-4">
-    <CredentialField
-      label="رقم الطالب"
-      value={user.id}
-      onCopy={() => onCopy(user.id)}
-      copied={copied}
-    />
+    <CredentialField label="رقم الطالب" value={user.id} />
     <CredentialField
       label="المفتاح السري"
       value={user.secret_key}
       isSecret
       showSecret={showKey}
       onToggleVisibility={() => setShowKey(!showKey)}
-      onCopy={() => onCopy(user.secret_key)}
-      copied={copied}
     />
   </div>
 );
@@ -323,16 +312,12 @@ const CredentialField: React.FC<{
   isSecret?: boolean;
   showSecret?: boolean;
   onToggleVisibility?: () => void;
-  onCopy: () => void;
-  copied: boolean;
 }> = ({
   label,
   value,
   isSecret = false,
   showSecret = false,
   onToggleVisibility,
-  onCopy,
-  copied,
 }) => (
   <div className="space-y-2">
     <label className="text-sm font-medium text-gray-500">{label}</label>
@@ -354,18 +339,6 @@ const CredentialField: React.FC<{
           )}
         </Button>
       )}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onCopy}
-        className="shrink-0"
-      >
-        {copied ? (
-          <Check className="h-4 w-4 text-green-500" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </Button>
     </div>
   </div>
 );
@@ -386,15 +359,6 @@ const StudentCredentialsDialog: React.FC<{
   user: User | RecordModel;
 }> = ({ user }) => {
   const [showKey, setShowKey] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const copyToClipboard = (text: string) => {
-    if (navigator && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   return (
     <Dialog>
@@ -412,8 +376,6 @@ const StudentCredentialsDialog: React.FC<{
             user={user}
             showKey={showKey}
             setShowKey={setShowKey}
-            copied={copied}
-            onCopy={copyToClipboard}
           />
           <CredentialsWarning />
         </div>
@@ -426,13 +388,6 @@ const MobileCredentialsDialog: React.FC<{
   user: User | RecordModel;
 }> = ({ user }) => {
   const [showKey, setShowKey] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <Dialog>
@@ -450,8 +405,6 @@ const MobileCredentialsDialog: React.FC<{
             user={user}
             showKey={showKey}
             setShowKey={setShowKey}
-            copied={copied}
-            onCopy={copyToClipboard}
           />
           <CredentialsWarning />
         </div>
