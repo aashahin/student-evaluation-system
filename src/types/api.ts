@@ -3,7 +3,7 @@ export type User = {
   name: string;
   email: string;
   password: string;
-  role: string; // admin, student, parent, teacher
+  role: string;
   age: number;
   secret_key: string;
   club_id?: string;
@@ -18,7 +18,7 @@ export type ReadingClub = {
   id: string;
   name: string;
   description?: string;
-  grade_level: string; // id
+  grade_level: string;
   max_members: number;
   teacher_id: string;
   created: string;
