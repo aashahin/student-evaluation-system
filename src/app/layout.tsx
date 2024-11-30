@@ -16,20 +16,8 @@ export const metadata: Metadata = {
   description: "نادي كلمة المدرسي, تعلم أولاً",
   keywords:
     "نادي كلمة المدرسي, تعلم أولاً, المدرسة, المدرسين, المدرسين العالمية, المدرسين العالمية الحديثة, المدرسين العالمية الحديثة التعليمية",
-  openGraph: {
-    type: "website",
-    locale: "ar",
-    url: "https://nadiyaklam.com", // TODO: Change this to your website URL
-    title: "نادي كلمة المدرسي",
-    description: "نادي كلمة المدرسي, تعلم أولاً",
-    images: [
-      {
-        url: "https://nadiyaklam.com/og-image.png", // TODO: Replace with your own image URL
-        width: 1200,
-        height: 630,
-        alt: "نادي كلمة المدرسي",
-      },
-    ],
+  icons: {
+    icon: "/favicon.ico",
   },
 };
 
