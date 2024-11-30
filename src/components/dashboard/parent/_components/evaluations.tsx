@@ -3,7 +3,6 @@ import { pb } from "@/lib/api";
 import { Survey, SurveyType, User } from "@/types/api";
 import { toast } from "sonner";
 import { StatsOverview } from "./evaluations/stats-overview";
-import { Filters } from "./evaluations/filters";
 import { SurveyList } from "./evaluations/survey-list";
 import { SurveyDialog } from "./evaluations/survey-dialog";
 import ParentSurveyDialog from "./evaluations/create-survey";
@@ -143,13 +142,6 @@ const ParentEvaluations = () => {
       </div>
 
       {stats && <StatsOverview stats={stats} totalSurveys={surveys.length} />}
-
-      <Filters
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-      />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
