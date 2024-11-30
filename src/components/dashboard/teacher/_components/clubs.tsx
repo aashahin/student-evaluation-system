@@ -32,17 +32,14 @@ export default function Clubs() {
       try {
         const counts: Record<string, number> = {};
         for (const clubId of clubIds) {
-          const records = await client
-            .collection("reading_club_members")
-            .getFullList({
-              filter: `club_id = "${clubId}"`,
-              requestKey: Math.random().toString(),
-              expand: "user_id",
-            });
+          const records = await client.collection("users").getFullList<User>({
+            filter: `club_id = "${clubId}"`,
+            requestKey: Math.random().toString(),
+          });
           counts[clubId] = records.length;
           setClubMembers((prevClubMembers) => ({
             ...prevClubMembers,
-            [clubId]: records.map((item) => item.expand?.user_id),
+            [clubId]: records.map((item) => item),
           }));
         }
         setClubMemberCounts(counts);

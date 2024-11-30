@@ -139,8 +139,8 @@ const EditBookDialog = ({
                       src={coverPreview}
                       alt="Book cover preview"
                       className="object-cover rounded-lg shadow-lg"
-                      width={120}
-                      height={60}
+                      width={260}
+                      height={150}
                     />
                     <button
                       type="button"

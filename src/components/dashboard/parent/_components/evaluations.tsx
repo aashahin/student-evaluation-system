@@ -1,11 +1,12 @@
 import React, { useCallback } from "react";
 import { pb } from "@/lib/api";
-import { Survey, SurveyType } from "@/types/api";
+import { Survey, SurveyType, User } from "@/types/api";
 import { toast } from "sonner";
 import { StatsOverview } from "./evaluations/stats-overview";
 import { Filters } from "./evaluations/filters";
 import { SurveyList } from "./evaluations/survey-list";
 import { SurveyDialog } from "./evaluations/survey-dialog";
+import ParentSurveyDialog from "./evaluations/create-survey";
 import { StatsData } from "./evaluations/types";
 
 const ParentEvaluations = () => {
@@ -18,6 +19,7 @@ const ParentEvaluations = () => {
   const [selectedSurvey, setSelectedSurvey] = React.useState<Survey | null>(
     null,
   );
+  const [clubId, setClubId] = React.useState<string | null>(null);
   const client = pb();
   const studentId = client.authStore.record?.student_id;
 
@@ -40,9 +42,23 @@ const ParentEvaluations = () => {
     }
   }, [client, studentId]);
 
+  const fetchClubId = useCallback(async () => {
+    try {
+      const clubId = await client
+        .collection("users")
+        .getFirstListItem<User>(`id = "${studentId}"`, {
+          requestKey: Math.random().toString(),
+        });
+      setClubId(clubId.club_id!);
+    } catch (error) {
+      toast.error("حدث خطأ أثناء الحصول على معرف النادي");
+    }
+  }, [client, studentId]);
+
   React.useEffect(() => {
     fetchSurveys();
-  }, [fetchSurveys]);
+    fetchClubId();
+  }, [fetchSurveys, fetchClubId]);
 
   const calculateStats = (): StatsData | null => {
     if (surveys.length === 0) return null;
@@ -136,6 +152,14 @@ const ParentEvaluations = () => {
       />
 
       <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">تقييمات المهارات</h2>
+          <ParentSurveyDialog
+            studentId={studentId!}
+            fetchSurveys={fetchSurveys}
+            clubId={clubId!}
+          />
+        </div>
         <SurveyList
           filteredSurveys={filteredSurveys}
           onResetFilters={() => {

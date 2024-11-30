@@ -87,7 +87,7 @@ const SurveysTeacherDetailsDialog = ({
       <DialogContent className="bg-gray-50 w-[95vw] md:max-w-[40rem] max-h-[90vh] p-4 sm:p-6 rounded-xl">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="sticky top-0 bg-gray-50 z-10 pb-4">
+          <div className="sticky top-0 z-10 pb-4">
             <DialogTitle className="text-xl sm:text-2xl font-semibold mb-4">
               تقييمات الطالب: {member.name}
             </DialogTitle>

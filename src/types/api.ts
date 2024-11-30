@@ -9,7 +9,6 @@ export type User = {
   club_id?: string;
   grade_level?: string;
   student_id?: string;
-  performance?: JSON;
   created: string;
   updated: string;
 };
@@ -115,6 +114,23 @@ export type EvaluationBookCard = {
       type: "rating" | "boolean" | "textarea" | "input";
     }[];
   };
+};
+
+export type BookEvaluation = {
+  id: string;
+  book_id: string;
+  student_id: string;
+  evaluation: {
+    data: {
+      question: string;
+      answer: string;
+    }[];
+  };
+  expand?: {
+    student_id?: User;
+  };
+  created: string;
+  updated: string;
 };
 
 export type Utils = {

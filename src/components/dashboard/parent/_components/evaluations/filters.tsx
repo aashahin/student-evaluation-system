@@ -24,7 +24,7 @@ export const Filters = ({
   setSelectedType,
 }: FiltersProps) => {
   return (
-    <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm p-4 -mx-4 sm:mx-0 sm:rounded-lg border">
+    <div className="bg-white p-4 rounded-lg border">
       <div className="flex flex-col sm:flex-row gap-4 max-w-7xl mx-auto">
         <div className="relative flex-1">
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />

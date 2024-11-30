@@ -1,4 +1,4 @@
-import { GradeLevel, ReadingClub, Survey } from "@/types/api";
+import { GradeLevel, ReadingClub } from "@/types/api";
 import PocketBase from "pocketbase";
 import React, { useState } from "react";
 import { toast } from "sonner";
