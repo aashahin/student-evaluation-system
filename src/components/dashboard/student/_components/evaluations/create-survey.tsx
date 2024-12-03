@@ -113,7 +113,7 @@ const DiscussionSurveyDialog = ({
           تقييم النقاش
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl min-h-screen sm:h-[90vh] flex flex-col">
+      <DialogContent className="max-w-xl max-h-screen sm:h-[90vh] flex flex-col">
         <DialogHeader className="relative">
           <DialogTitle className="text-xl font-bold text-center mb-4">
             تقييم نقاش الكتاب
@@ -143,7 +143,7 @@ const DiscussionSurveyDialog = ({
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                   className={cn(
-                    "bg-muted/50 p-6 rounded-lg space-y-4 hover:bg-muted/70 transition-all",
+                    "bg-muted/50 p-4 rounded-lg space-y-4 hover:bg-muted/70 transition-all",
                     formattedAnswers[index]?.rating > 0 &&
                       "border-2 border-primary/20",
                   )}
@@ -203,7 +203,7 @@ const DiscussionSurveyDialog = ({
               ))}
             </AnimatePresence>
 
-            <div className="sticky bottom-0 bg-background pt-4">
+            <div className="sticky bottom-0 bg-white pt-4">
               <Button
                 type="submit"
                 className="w-full"

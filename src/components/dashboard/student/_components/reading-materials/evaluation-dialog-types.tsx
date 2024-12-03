@@ -46,9 +46,8 @@ const TypesInput = ({
                 required
               />
               <span className="text-3xl transition-transform group-hover:scale-110">
-                {"⭐".repeat(rating)}
+                {rating}
               </span>
-              <span className="text-sm font-medium">{rating}</span>
               {value === rating.toString() && (
                 <motion.div
                   initial={{ scale: 0 }}

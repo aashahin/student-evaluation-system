@@ -125,7 +125,7 @@ const CreateSurveyDialog = ({
           تقييم جديد
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl min-h-screen sm:h-[90vh] flex flex-col">
+      <DialogContent className="max-w-xl min-h-screen sm:h-[90vh] flex flex-col">
         <DialogHeader className="relative">
           <DialogTitle className="text-xl font-bold text-center mb-4">
             تقييم الطالب

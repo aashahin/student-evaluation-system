@@ -6,205 +6,109 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import SurveyDetails from "@/components/dashboard/_components/survey-details";
 import { Survey, User } from "@/types/api";
 import { CalendarIcon, ClipboardIcon } from "lucide-react";
 
-type SurveyDetailsDialogProps = {
-  openSurveyDetails: boolean;
-  setOpenSurveyDetails: (open: boolean) => void;
-  selectedSurvey: Survey | null;
-  setSelectedSurvey: (survey: Survey | null) => void;
-  survey: Survey;
-};
+const RatingDisplay = ({ rating }: { rating: number }) => {
+  const getColorClass = (rating: number) => {
+    if (rating >= 4.5) return "bg-green-500";
+    if (rating >= 3.5) return "bg-blue-500";
+    if (rating >= 2.5) return "bg-yellow-500";
+    return "bg-red-500";
+  };
 
-const SurveysDetailsDialog = ({
-  openSurveyDetails,
-  setOpenSurveyDetails,
-  selectedSurvey,
-  setSelectedSurvey,
-  survey,
-}: SurveyDetailsDialogProps) => {
   return (
-    <Dialog
-      open={openSurveyDetails && selectedSurvey?.id === survey.id}
-      onOpenChange={(open) => {
-        setOpenSurveyDetails(open);
-        if (open) {
-          setSelectedSurvey(survey);
-        }
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button variant="link">عرض التفاصيل</Button>
-      </DialogTrigger>
-      <DialogContent className="bg-gray-50">
-        <DialogTitle>تفاصيل التقييم</DialogTitle>
-        <div className="mt-2 border-t border-gray-300" />
-        <SurveyDetails survey={survey} />
-      </DialogContent>
-    </Dialog>
+    <div className="flex items-center gap-2">
+      <div
+        className={`${getColorClass(
+          rating,
+        )} text-white rounded-full w-8 h-8 flex items-center justify-center font-medium`}
+        title={`التقييم: ${rating} من 5`}
+      >
+        {rating.toFixed(1)}
+      </div>
+      <span className="text-sm text-gray-500">من 5</span>
+    </div>
   );
 };
 
-type SurveyTeacherDetailsDialogProps = {
-  openTeacherSurveys: boolean;
-  setOpenTeacherSurveys: (open: boolean) => void;
-  selectedMember: User | null;
-  setSelectedMember: (member: User | null) => void;
-  member: User;
-  memberSurveys: Record<string, Survey[]>;
+// Reusable Survey Card Component
+const SurveyCard = ({ survey }: { survey: Survey }) => {
+  const avgRating =
+    survey.questions.data.reduce((sum, q) => sum + q.rating, 0) /
+    survey.questions.data.length;
+
+  return (
+    <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all border">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <CalendarIcon className="w-4 h-4" />
+          {new Date(survey.created).toLocaleDateString("ar")}
+        </div>
+        <RatingDisplay rating={avgRating} />
+      </div>
+
+      <div className="space-y-4">
+        {survey.questions.data.map((question, idx) => (
+          <div key={idx} className="border-b pb-3 last:border-b-0 last:pb-0">
+            <p className="text-gray-700 mb-2 font-medium">
+              {question.question}
+            </p>
+            <RatingDisplay rating={question.rating} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
-const SurveysTeacherDetailsDialog = ({
-  openTeacherSurveys,
-  setOpenTeacherSurveys,
-  selectedMember,
-  setSelectedMember,
-  member,
-  memberSurveys,
-}: SurveyTeacherDetailsDialogProps) => {
+// Empty State Component
+const EmptySurveyState = () => (
+  <div className="text-center py-8">
+    <ClipboardIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+    <h3 className="text-gray-700 font-medium">لا توجد تقييمات</h3>
+    <p className="text-sm text-gray-500 mt-1">لم يتم إضافة أي تقييمات بعد</p>
+  </div>
+);
+
+// Main Survey Dialog Component
+const SurveyDialog = ({
+  trigger,
+  surveys,
+  title,
+}: {
+  trigger: React.ReactNode;
+  surveys: Survey[];
+  title: string;
+}) => {
   return (
-    <Dialog
-      open={openTeacherSurveys && selectedMember?.id === member.id}
-      onOpenChange={(open) => {
-        setOpenTeacherSurveys(open);
-        if (open) setSelectedMember(member);
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button
-          variant="link"
-          className="hover:text-blue-600 transition-colors duration-200 group flex items-center gap-2 mx-auto"
-        >
-          <span className="font-medium">
-            {memberSurveys[member.id]?.length ?? 0}
-          </span>
-          <span className="group-hover:underline">تقييم</span>
-        </Button>
-      </DialogTrigger>
+    <Dialog>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-w-xl min-h-screen sm:min-h-[80vh] scrollarea">
+        <DialogTitle>{title}</DialogTitle>
 
-      <DialogContent className="bg-gray-50 w-[95vw] md:max-w-[40rem] max-h-[90vh] p-4 sm:p-6 rounded-xl">
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="sticky top-0 z-10 pb-4">
-            <DialogTitle className="text-xl sm:text-2xl font-semibold mb-4">
-              تقييمات الطالب: {member.name}
-            </DialogTitle>
-
-            {/* Stats & Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="bg-blue-50 px-4 py-2 rounded-full transition-all hover:bg-blue-100">
-                  <span className="text-sm font-medium text-blue-700">
-                    {memberSurveys[member.id]?.length ?? 0} تقييم
-                  </span>
-                </div>
-                {memberSurveys[member.id]?.length > 0 && (
-                  <div className="bg-purple-50 px-4 py-2 rounded-full transition-all hover:bg-purple-100">
-                    <span className="text-sm font-medium text-purple-700">
-                      معدل التقييم:{" "}
-                      {(
-                        memberSurveys[member.id].reduce((acc, survey) => {
-                          const surveyAvg =
-                            survey.questions.data.reduce(
-                              (sum, q) => sum + q.rating,
-                              0,
-                            ) / survey.questions.data.length;
-                          return acc + surveyAvg;
-                        }, 0) / memberSurveys[member.id].length
-                      ).toFixed(1)}
-                      /5
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="text-sm text-gray-600 flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4" />
-                <span>
-                  آخر تقييم:{" "}
-                  {memberSurveys[member.id]?.[0]
-                    ? new Date(
-                        memberSurveys[member.id][0].created,
-                      ).toLocaleDateString("ar")
-                    : "لا يوجد"}
-                </span>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-200" />
-          </div>
-
-          {/* Surveys List */}
-          <div className="overflow-y-auto px-1 flex-1 space-y-4 mt-4 custom-scrollbar">
-            {memberSurveys[member.id]?.length > 0 ? (
-              [...memberSurveys[member.id]].map((survey) => {
-                const avgRating =
+        {surveys.length > 0 && (
+          <span className="bg-gray-50 px-4 py-2 rounded-lg mb-4 text-sm">
+            المعدل العام:{" "}
+            {(
+              surveys.reduce((acc, survey) => {
+                const surveyAvg =
                   survey.questions.data.reduce((sum, q) => sum + q.rating, 0) /
                   survey.questions.data.length;
+                return acc + surveyAvg;
+              }, 0) / surveys.length
+            ).toFixed(1)}
+          </span>
+        )}
 
-                const getRatingColor = (rating: number) => {
-                  if (rating >= 4)
-                    return "bg-green-50 text-green-600 border-green-200";
-                  if (rating >= 3)
-                    return "bg-blue-50 text-blue-600 border-blue-200";
-                  if (rating >= 2)
-                    return "bg-yellow-50 text-yellow-600 border-yellow-200";
-                  return "bg-red-50 text-red-600 border-red-200";
-                };
-
-                return (
-                  <div
-                    key={survey.id}
-                    className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100
-                             hover:shadow-md hover:border-gray-200 transition-all duration-200"
-                  >
-                    <div className="flex flex-col sm:flex-row justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm text-gray-600 flex items-center gap-2">
-                          <CalendarIcon className="w-4 h-4" />
-                          {new Date(survey.created).toLocaleDateString("ar")}
-                        </div>
-                        <div
-                          className={`px-3 py-1 rounded-full text-sm font-medium border ${getRatingColor(avgRating)}`}
-                        >
-                          {avgRating.toFixed(1)}/5
-                        </div>
-                      </div>
-
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200
-                                     transition-all duration-200"
-                          >
-                            عرض التفاصيل
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="bg-gray-50">
-                          <DialogTitle>تفاصيل التقييم</DialogTitle>
-                          <div className="mt-2 border-t border-gray-200" />
-                          <SurveyDetails survey={survey} />
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </div>
-                );
-              })
+        <div className="overflow-y-auto flex-1 pr-2">
+          <div className="space-y-4">
+            {surveys.length > 0 ? (
+              surveys.map((survey) => (
+                <SurveyCard key={survey.id} survey={survey} />
+              ))
             ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ClipboardIcon className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  لا توجد تقييمات
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  لم يتم إضافة أي تقييمات لهذا الطالب بعد
-                </p>
-              </div>
+              <EmptySurveyState />
             )}
           </div>
         </div>
@@ -213,4 +117,29 @@ const SurveysTeacherDetailsDialog = ({
   );
 };
 
-export { SurveysDetailsDialog, SurveysTeacherDetailsDialog };
+export const SurveysDetailsDialog = ({ survey }: { survey: Survey }) => (
+  <SurveyDialog
+    trigger={<Button variant="link">عرض التفاصيل</Button>}
+    surveys={[survey]}
+    title="تفاصيل التقييم"
+  />
+);
+
+export const SurveysTeacherDetailsDialog = ({
+  member,
+  memberSurveys,
+}: {
+  member: User;
+  memberSurveys: Record<string, Survey[]>;
+}) => (
+  <SurveyDialog
+    trigger={
+      <Button variant="link" className="flex items-center gap-2">
+        <span>{memberSurveys[member.id]?.length ?? 0}</span>
+        <span>تقييم</span>
+      </Button>
+    }
+    surveys={memberSurveys[member.id] ?? []}
+    title={`تقييمات الطالب: ${member.name}`}
+  />
+);

@@ -8,10 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { EvaluationBookCard } from "@/types/api";
 import PocketBase from "pocketbase";
-import { ChevronLeft, ChevronRight, Loader, BookOpen } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Loader, BookOpen } from "lucide-react";
 import { toast } from "sonner";
-import { AnimatePresence, motion } from "framer-motion";
 import { TypesInput } from "@/components/dashboard/student/_components/reading-materials/evaluation-dialog-types";
 
 type EvaluationDialogProps = {
@@ -35,11 +33,6 @@ const EvaluationDialog = ({
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-
-  // Calculate progress
-  const totalSteps = questions?.data.data.length || 0;
-  const progress = ((currentStep + 1) / totalSteps) * 100;
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -71,6 +64,16 @@ const EvaluationDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate that all questions are answered
+    const totalQuestions = questions?.data.data.length || 0;
+    const answeredQuestions = Object.keys(answers).length;
+
+    if (answeredQuestions < totalQuestions) {
+      toast.error("الرجاء الإجابة على جميع الأسئلة");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -87,7 +90,6 @@ const EvaluationDialog = ({
 
       toast.success("تم حفظ التقييم بنجاح");
       onOpenChange(false);
-      setCurrentStep(0);
       setAnswers({});
     } catch (error) {
       toast.error("حدث خطأ في حفظ التقييم");
@@ -96,27 +98,13 @@ const EvaluationDialog = ({
     }
   };
 
-  const canGoNext = () => {
-    if (!questions?.data.data[currentStep]) return false;
-    return !!answers[questions.data.data[currentStep].title];
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh]">
-        <DialogHeader className="sticky top-0 z-10 pb-4">
-          <DialogTitle className="text-2xl font-bold text-center mb-4">
+      <DialogContent className="sm:max-w-xl max-h-screen sm:max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-center">
             تقييم الكتاب
           </DialogTitle>
-
-          {!isLoading && (
-            <div className="flex items-center gap-4 mb-6">
-              <Progress value={progress} className="h-2" />
-              <span className="text-sm font-medium whitespace-nowrap">
-                {currentStep + 1} / {totalSteps}
-              </span>
-            </div>
-          )}
         </DialogHeader>
 
         {isLoading ? (
@@ -129,66 +117,34 @@ const EvaluationDialog = ({
             className="space-y-6"
             onKeyDown={handleKeyDown}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.2 }}
-              >
-                {questions?.data.data[currentStep] && (
-                  <TypesInput
-                    item={questions.data.data[currentStep]}
-                    answers={answers}
-                    setAnswers={setAnswers}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
-
-            <div className="flex justify-between gap-4 mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCurrentStep((prev) => prev - 1)}
-                disabled={currentStep === 0}
-                className="w-full"
-              >
-                <ChevronRight className="w-4 h-4 mr-2" />
-                السابق
-              </Button>
-
-              {currentStep === totalSteps - 1 ? (
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmitting || !canGoNext()}
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <Loader className="w-5 h-5 animate-spin" />
-                      جاري الحفظ...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="w-5 h-5" />
-                      حفظ التقييم
-                    </div>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={() => setCurrentStep((prev) => prev + 1)}
-                  disabled={!canGoNext()}
-                  className="w-full"
-                >
-                  التالي
-                  <ChevronLeft className="w-4 h-4 ml-2" />
-                </Button>
-              )}
+            <div className="space-y-6">
+              {questions?.data.data.map((item, index) => (
+                <TypesInput
+                  key={index}
+                  item={item}
+                  answers={answers}
+                  setAnswers={setAnswers}
+                />
+              ))}
             </div>
+
+            <Button
+              type="submit"
+              className="w-full mt-6"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <Loader className="w-5 h-5 animate-spin" />
+                  جاري الحفظ...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  حفظ التقييم
+                </div>
+              )}
+            </Button>
           </form>
         )}
       </DialogContent>
