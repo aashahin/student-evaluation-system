@@ -2,16 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { pb } from "@/lib/api";
-import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 import CreateSurveyForm from "./create-survey-form";
 
 type CreateSurveyDialogProps = {
@@ -41,12 +41,32 @@ const CreateSurveyDialog = ({
   const [formattedAnswers, setFormattedAnswers] = useState<FormattedQuestion[]>(
     [],
   );
-  const [currentStep, setCurrentStep] = useState(0);
   const client = pb();
 
-  // Calculate progress
-  const totalSteps = questions.length;
-  const progress = ((currentStep + 1) / totalSteps) * 100;
+  const resetForm = () => {
+    setFormattedAnswers([]);
+    if (questions.length > 0) {
+      const initialAnswers: FormattedQuestion[] = [];
+      questions.forEach((category: Question) => {
+        if (
+          category?.label &&
+          category?.questions &&
+          Array.isArray(category.questions)
+        ) {
+          category.questions.forEach((question: string) => {
+            if (question) {
+              initialAnswers.push({
+                category: category.label,
+                question: question,
+                rating: 0,
+              });
+            }
+          });
+        }
+      });
+      setFormattedAnswers(initialAnswers);
+    }
+  };
 
   useEffect(() => {
     const getQuestions = async () => {
@@ -57,22 +77,26 @@ const CreateSurveyDialog = ({
             requestKey: Math.random().toString(),
           });
 
-        // Make sure we're accessing the correct data structure
-        const questionsData = response.value.data || [];
+        const questionsData = response.value?.data || [];
 
         if (Array.isArray(questionsData)) {
           setQuestions(questionsData);
 
-          // Initialize formatted answers
           const initialAnswers: FormattedQuestion[] = [];
-          questionsData.forEach((category) => {
-            if (category.questions && Array.isArray(category.questions)) {
+          questionsData.forEach((category: Question) => {
+            if (
+              category?.label &&
+              category?.questions &&
+              Array.isArray(category.questions)
+            ) {
               category.questions.forEach((question: string) => {
-                initialAnswers.push({
-                  category: category.label,
-                  question: question,
-                  rating: 0,
-                });
+                if (question) {
+                  initialAnswers.push({
+                    category: category.label,
+                    question: question,
+                    rating: 0,
+                  });
+                }
               });
             }
           });
@@ -87,53 +111,60 @@ const CreateSurveyDialog = ({
   }, [client]);
 
   return (
-    <Drawer
+    <Dialog
       open={open}
-      onOpenChange={setOpen}
-      fadeFromIndex={currentStep}
-      snapPoints={[1, 2, 3, 4, 5]}
+      onOpenChange={(newOpen) => {
+        if (!newOpen) {
+          resetForm();
+        }
+        setOpen(newOpen);
+      }}
     >
-      <DrawerTrigger asChild>
-        <Button variant="link">إضافة تقييم</Button>
-      </DrawerTrigger>
-
-      <DrawerContent className="max-h-[90vh]">
-        <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 overflow-y-scroll">
-          <DrawerHeader className="sticky top-0 bg-background z-10 pb-4">
-            <DrawerTitle className="text-xl sm:text-2xl font-bold text-center mb-4">
-              نموذج التقييم
-            </DrawerTitle>
-
-            {/* Add instructions */}
-            <p className="text-muted-foreground text-sm text-center mb-4">
-              يرجى تقييم كل سؤال على مقياس من 0 إلى 5 نجوم، حيث 5 هو الأفضل و 0
-              هو الأسوأ
+      <DialogTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          تقييم جديد
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl min-h-screen sm:h-[90vh] flex flex-col">
+        <DialogHeader className="relative">
+          <DialogTitle className="text-xl font-bold text-center mb-4">
+            تقييم الطالب
+          </DialogTitle>
+          <div className="space-y-2">
+            <Progress
+              value={
+                (formattedAnswers.filter((a) => a.rating > 0).length /
+                  formattedAnswers.length) *
+                100
+              }
+              className="h-2"
+            />
+            <p className="text-muted-foreground text-sm text-center">
+              {formattedAnswers.every((a) => a.rating > 0) ? (
+                <span className="text-green-500">
+                  تم الإجابة على جميع الأسئلة
+                </span>
+              ) : (
+                `تم الإجابة على ${Math.round((formattedAnswers.filter((a) => a.rating > 0).length / formattedAnswers.length) * 100)}% من الأسئلة`
+              )}
             </p>
+          </div>
+        </DialogHeader>
 
-            <div className="flex items-center gap-2 sm:gap-4 mb-6">
-              <Progress value={progress} className="h-2" />
-              <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
-                {currentStep + 1} / {totalSteps}
-              </span>
-            </div>
-          </DrawerHeader>
-
+        <div className="flex-1 overflow-y-auto">
           <CreateSurveyForm
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
+            formattedAnswers={formattedAnswers}
             setFormattedAnswers={setFormattedAnswers}
             client={client}
-            formattedAnswers={formattedAnswers}
             clubId={clubId}
             studentId={studentId}
             setOpen={setOpen}
             questions={questions}
             fetchClubs={fetchClubs}
-            totalSteps={totalSteps}
           />
         </div>
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 };
 

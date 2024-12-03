@@ -1,32 +1,23 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Survey } from "@/types/api";
-import { CalendarIcon, FilterIcon, StarIcon } from "lucide-react";
+import { CalendarIcon, StarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { surveyTypeLabels, surveyTypeStyles } from "./types";
 
 type SurveyListProps = {
-  filteredSurveys: Survey[];
-  onResetFilters: () => void;
-  onSelectSurvey: (survey: Survey) => void;
+  surveys: Survey[];
 };
 
 export const SurveyList = ({
-  filteredSurveys,
-  onResetFilters,
-  onSelectSurvey,
+  surveys = [],
 }: SurveyListProps) => {
-  if (filteredSurveys.length === 0) {
+  if (surveys.length === 0) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <FilterIcon className="h-12 w-12 text-gray-300 mb-4" />
           <p className="text-gray-500 mb-2">
-            لا يوجد تقييمات تطابق معايير البحث
+            لا يوجد تقييمات
           </p>
-          <Button variant="outline" onClick={onResetFilters}>
-            إعادة ضبط الفلتر
-          </Button>
         </CardContent>
       </Card>
     );
@@ -34,7 +25,7 @@ export const SurveyList = ({
 
   return (
     <>
-      {filteredSurveys.map((survey) => {
+      {surveys.map((survey) => {
         const averageRating = (
           survey.questions.data.reduce((sum, q) => sum + q.rating, 0) /
           survey.questions.data.length
@@ -68,12 +59,6 @@ export const SurveyList = ({
                     <CalendarIcon className="h-4 w-4" />
                     {new Date(survey.created).toLocaleDateString("ar-SA")}
                   </span>
-                  <Button
-                    variant="ghost"
-                    onClick={() => onSelectSurvey(survey)}
-                  >
-                    عرض التفاصيل
-                  </Button>
                 </div>
               </div>
             </CardContent>

@@ -4,20 +4,12 @@ import { Survey, SurveyType, User } from "@/types/api";
 import { toast } from "sonner";
 import { StatsOverview } from "./evaluations/stats-overview";
 import { SurveyList } from "./evaluations/survey-list";
-import { SurveyDialog } from "./evaluations/survey-dialog";
 import ParentSurveyDialog from "./evaluations/create-survey";
 import { StatsData } from "./evaluations/types";
 
 const ParentEvaluations = () => {
   const [surveys, setSurveys] = React.useState<Survey[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedType, setSelectedType] = React.useState<SurveyType | "all">(
-    "all",
-  );
-  const [selectedSurvey, setSelectedSurvey] = React.useState<Survey | null>(
-    null,
-  );
   const [clubId, setClubId] = React.useState<string | null>(null);
   const client = pb();
   const studentId = client.authStore.record?.student_id;
@@ -101,14 +93,6 @@ const ParentEvaluations = () => {
 
   const stats = calculateStats();
 
-  const filteredSurveys = surveys.filter((survey) => {
-    const matchesType = selectedType === "all" || survey.type === selectedType;
-    const matchesSearch = survey.questions.data.some((q) =>
-      q.question.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-    return matchesType && matchesSearch;
-  });
-
   if (isLoading) {
     return (
       <div className="space-y-8 max-w-7xl mx-auto animate-fade-in">
@@ -152,20 +136,8 @@ const ParentEvaluations = () => {
             clubId={clubId!}
           />
         </div>
-        <SurveyList
-          filteredSurveys={filteredSurveys}
-          onResetFilters={() => {
-            setSearchQuery("");
-            setSelectedType("all");
-          }}
-          onSelectSurvey={setSelectedSurvey}
-        />
+        <SurveyList surveys={surveys} />
       </div>
-
-      <SurveyDialog
-        survey={selectedSurvey}
-        onOpenChange={(open) => !open && setSelectedSurvey(null)}
-      />
     </div>
   );
 };

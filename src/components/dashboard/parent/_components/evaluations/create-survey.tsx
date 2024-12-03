@@ -1,21 +1,20 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { pb } from "@/lib/api";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type ParentSurveyDialogProps = {
   studentId: string;
@@ -37,16 +36,11 @@ const ParentSurveyDialog = ({
 }: ParentSurveyDialogProps) => {
   const [open, setOpen] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [formattedAnswers, setFormattedAnswers] = useState<FormattedQuestion[]>(
-    [],
-  );
+  const [formattedAnswers, setFormattedAnswers] = useState<FormattedQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const client = pb();
 
-  // Calculate progress
-  const progress =
-    (formattedAnswers.filter((a) => a.rating > 0).length / questions.length) *
-    100;
+  const progress = (formattedAnswers.filter((a) => a.rating > 0).length / questions.length) * 100;
 
   useEffect(() => {
     const getQuestions = async () => {
@@ -109,39 +103,31 @@ const ParentSurveyDialog = ({
   };
 
   return (
-    <Drawer
-      open={open}
-      onOpenChange={setOpen}
-      fadeFromIndex={0}
-      snapPoints={[1, 2, 3, 4, 5]}
-    >
-      <DrawerTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button variant="outline" className="gap-2 me-1">
-          <Star className="w-4 h-4" />
           تقييم جديد
         </Button>
-      </DrawerTrigger>
-      <DrawerContent className="max-h-[90vh]">
-        <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 overflow-y-auto">
-          <DrawerHeader className="sticky top-0 bg-background z-10">
-            <DrawerTitle className="text-xl font-bold text-center mb-4">
-              تقييم مهارات الطالب
-            </DrawerTitle>
-            <div className="space-y-2">
-              <Progress value={progress} className="h-2" />
-              <p className="text-muted-foreground text-sm text-center">
-                {progress === 100 ? (
-                  <span className="text-green-500">
-                    تم الإجابة على جميع الأسئلة
-                  </span>
-                ) : (
-                  `تم الإجابة على ${Math.round(progress)}% من الأسئلة`
-                )}
-              </p>
-            </div>
-          </DrawerHeader>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+        <DialogHeader className="relative">
+          <DialogTitle className="text-xl font-bold text-center mb-4">
+            تقييم مهارات الطالب
+          </DialogTitle>
+          <div className="space-y-2">
+            <Progress value={progress} className="h-2" />
+            <p className="text-muted-foreground text-sm text-center">
+              {progress === 100 ? (
+                <span className="text-green-500">تم الإجابة على جميع الأسئلة</span>
+              ) : (
+                `تم الإجابة على ${Math.round(progress)}% من الأسئلة`
+              )}
+            </p>
+          </div>
+        </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6 pb-8">
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="space-y-6 p-6">
             <AnimatePresence mode="wait">
               {questions.map((question, index) => (
                 <motion.div
@@ -152,8 +138,7 @@ const ParentSurveyDialog = ({
                   transition={{ duration: 0.3 }}
                   className={cn(
                     "bg-muted/50 p-6 rounded-lg space-y-4 hover:bg-muted/70 transition-all",
-                    formattedAnswers[index]?.rating > 0 &&
-                      "border-2 border-primary/20",
+                    formattedAnswers[index]?.rating > 0 && "border-2 border-primary/20"
                   )}
                 >
                   <div className="flex items-start gap-3">
@@ -171,9 +156,8 @@ const ParentSurveyDialog = ({
                         key={rating}
                         className={cn(
                           "relative group flex flex-col items-center gap-1 cursor-pointer transition-all duration-200 min-w-[50px] p-2 rounded-lg",
-                          formattedAnswers[index]?.rating === rating &&
-                            "bg-primary/10",
-                          "hover:bg-primary/5",
+                          formattedAnswers[index]?.rating === rating && "bg-primary/10",
+                          "hover:bg-primary/5"
                         )}
                       >
                         <input
@@ -192,17 +176,14 @@ const ParentSurveyDialog = ({
                           className="sr-only"
                           required
                         />
-                        <span
-                          className={cn(
-                            "text-2xl transition-transform group-hover:scale-110",
-                            formattedAnswers[index]?.rating === rating &&
-                              "scale-110",
-                          )}
-                        >
-                          {rating === 0 ? "0" : "⭐".repeat(rating)}
+                        <span className={cn(
+                          "text-lg font-semibold transition-transform group-hover:scale-110",
+                          formattedAnswers[index]?.rating === rating && "scale-110"
+                        )}>
+                          {rating === 0 ? "-" : rating}
                         </span>
                         <span className="text-xs font-medium">
-                          {rating === 0 ? "لا تقييم" : rating}
+                          {rating === 0 ? "لا تقييم" : "تقييم"}
                         </span>
                       </label>
                     ))}
@@ -211,13 +192,11 @@ const ParentSurveyDialog = ({
               ))}
             </AnimatePresence>
 
-            <div className="sticky bottom-0 bg-background pt-4 pb-6">
+            <div className="sticky bottom-0 bg-background pt-4">
               <Button
                 type="submit"
                 className="w-full"
-                disabled={
-                  isLoading || formattedAnswers.some((a) => a.rating === 0)
-                }
+                disabled={isLoading || formattedAnswers.some((a) => a.rating === 0)}
               >
                 {isLoading ? (
                   "جاري الحفظ..."
@@ -233,8 +212,8 @@ const ParentSurveyDialog = ({
             </div>
           </form>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 };
 
