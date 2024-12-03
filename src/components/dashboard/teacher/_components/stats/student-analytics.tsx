@@ -182,7 +182,9 @@ export function StudentAnalytics({
     const months = Array.from(monthlyData.keys()).sort();
     return months.map((month) => {
       const monthData = monthlyData.get(month)!;
-      const dataPoint: Record<string, number | null> = {};
+      const dataPoint: Record<string, number | string | null> = {
+        month: month,
+      };
 
       students.forEach((student) => {
         const stats = monthData.get(student.id);
@@ -217,6 +219,7 @@ export function StudentAnalytics({
                   dataKey="name"
                   tick={{ fill: "#6b7280" }}
                   tickLine={{ stroke: "#e5e7eb" }}
+                  padding={{ left: 100, right: 100 }}
                 />
                 <Tooltip
                   cursor={{ fill: "rgba(147, 197, 253, 0.1)" }}
@@ -354,15 +357,12 @@ export function StudentAnalytics({
                   tick={{ fill: "#374151", fontSize: 12 }}
                   tickLine={{ stroke: "#9ca3af" }}
                   axisLine={{ stroke: "#9ca3af" }}
-                  label={{
-                    value: "الشهر",
-                    position: "bottom",
-                    offset: 0,
-                    style: {
-                      fill: "#1f2937",
-                      marginTop: "10px",
-                      fontWeight: 500,
-                    },
+                  tickFormatter={(value) => {
+                    const [year, month] = value.split("-");
+                    const date = new Date(parseInt(year), parseInt(month) - 1);
+                    return new Intl.DateTimeFormat("ar-EG", {
+                      month: "short",
+                    }).format(date);
                   }}
                 />
                 <YAxis
