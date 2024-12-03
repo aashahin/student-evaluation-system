@@ -45,13 +45,9 @@ const ClubStudentTable = ({
   onEditBook,
   fetchBooks,
 }: ClubStudentTableProps) => {
-  const [openSurveyDetails, setOpenSurveyDetails] = useState(false);
-  const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null);
   const [memberSurveys, setMemberSurveys] = useState<Record<string, Survey[]>>(
     {},
   );
-  const [openTeacherSurveys, setOpenTeacherSurveys] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchMemberSurveys = async () => {
@@ -111,10 +107,6 @@ const ClubStudentTable = ({
               {activeTab === "surveys" ? (
                 SurveyTableRow({
                   surveys,
-                  selectedSurvey,
-                  setSelectedSurvey,
-                  openSurveyDetails,
-                  setOpenSurveyDetails,
                 })
               ) : activeTab === "books" ? (
                 <BookTableRow
@@ -127,10 +119,6 @@ const ClubStudentTable = ({
               ) : (
                 <MemberTableRow
                   members={clubMembers}
-                  selectedMember={selectedMember}
-                  setSelectedMember={setSelectedMember}
-                  openTeacherSurveys={openTeacherSurveys}
-                  setOpenTeacherSurveys={setOpenTeacherSurveys}
                   memberSurveys={memberSurveys}
                   clubId={clubId}
                   fetchClubs={fetchClubs}

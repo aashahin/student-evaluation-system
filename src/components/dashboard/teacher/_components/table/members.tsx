@@ -40,19 +40,11 @@ const MemberTableHead = () => (
 
 const MemberTableRow = ({
   members,
-  selectedMember,
-  setSelectedMember,
-  openTeacherSurveys,
-  setOpenTeacherSurveys,
   memberSurveys,
   clubId,
   fetchClubs,
 }: {
   members: User[];
-  selectedMember: User | null;
-  setSelectedMember: (member: User | null) => void;
-  openTeacherSurveys: boolean;
-  setOpenTeacherSurveys: (open: boolean) => void;
   memberSurveys: Record<string, Survey[]>;
   clubId: string;
   fetchClubs: () => Promise<void>;
@@ -70,13 +62,8 @@ const MemberTableRow = ({
       </td>
       <td className="px-4 sm:px-6 py-4 text-center">
         <SurveysTeacherDetailsDialog
-          openTeacherSurveys={openTeacherSurveys}
-          setOpenTeacherSurveys={setOpenTeacherSurveys}
-          selectedMember={selectedMember}
-          setSelectedMember={setSelectedMember}
           member={member}
           memberSurveys={memberSurveys}
-          key={member.id}
         />
       </td>
 

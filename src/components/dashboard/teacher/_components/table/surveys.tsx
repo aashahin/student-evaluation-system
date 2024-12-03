@@ -25,19 +25,7 @@ const SurveyTableHead = () => (
   </>
 );
 
-const SurveyTableRow = ({
-  surveys,
-  selectedSurvey,
-  setSelectedSurvey,
-  openSurveyDetails,
-  setOpenSurveyDetails,
-}: {
-  surveys: Survey[];
-  selectedSurvey: Survey | null;
-  setSelectedSurvey: (survey: Survey | null) => void;
-  openSurveyDetails: boolean;
-  setOpenSurveyDetails: (open: boolean) => void;
-}) =>
+const SurveyTableRow = ({ surveys }: { surveys: Survey[] }) =>
   surveys
     .filter((survey) => survey.type === "self-assessment")
     .map((survey) => (
@@ -49,14 +37,7 @@ const SurveyTableRow = ({
           {new Date(survey.created).toLocaleDateString("ar")}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-center">
-          <SurveysDetailsDialog
-            openSurveyDetails={openSurveyDetails}
-            setOpenSurveyDetails={setOpenSurveyDetails}
-            selectedSurvey={selectedSurvey}
-            setSelectedSurvey={setSelectedSurvey}
-            survey={survey}
-            key={survey.id}
-          />
+          <SurveysDetailsDialog survey={survey} key={survey.id} />
         </td>
       </tr>
     ));
