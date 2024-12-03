@@ -47,7 +47,7 @@ const FullDetailsDialog = ({
                 </span>
               </div>
               <span className="text-sm text-gray-500">
-                {new Date(evaluation.created).toLocaleDateString("ar-SA")}
+                {new Date(evaluation.created).toLocaleDateString("ar")}
               </span>
             </div>
             <div className="space-y-6">
@@ -164,7 +164,7 @@ const BookEvaluationDetailsDialog = ({
                     <span>
                       تاريخ التقييم:{" "}
                       {new Date(evaluations[0].created).toLocaleDateString(
-                        "ar-SA",
+                        "ar",
                       )}
                     </span>
                   </div>
@@ -199,9 +199,7 @@ const BookEvaluationDetailsDialog = ({
                         </span>
                       </div>
                       <span className="text-sm text-gray-500">
-                        {new Date(evaluation.created).toLocaleDateString(
-                          "ar-SA",
-                        )}
+                        {new Date(evaluation.created).toLocaleDateString("ar")}
                       </span>
                     </div>
                     <div className="space-y-4">

@@ -1,9 +1,8 @@
 "use client";
 
-import { BarChart2, RefreshCw } from "lucide-react";
+import { BarChart2, RefreshCw, Users } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import UpcomingDiscussions from "./upcoming-discussions";
 import { pb } from "@/lib/api";
 import {
   Discussion,
@@ -25,6 +24,8 @@ import {
 } from "@/components/ui/select";
 import { StatsCard } from "@/components/dashboard/teacher/_components/stats/state-card";
 import { getStatsConfig } from "@/components/dashboard/teacher/_components/stats/stats-config";
+import { StudentAnalytics } from "@/components/dashboard/teacher/_components/stats/student-analytics";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Period = "year" | "semester" | "month";
 
@@ -42,6 +43,8 @@ export default function Reports() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>("year");
+  const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [students, setStudents] = useState<User[]>([]);
 
   const client = pb();
 
@@ -77,12 +80,30 @@ export default function Reports() {
           requestKey: Math.random().toString(),
         });
 
+      // Fetch surveys and students for analytics
+      const surveysResult = await client
+        .collection("surveys")
+        .getFullList<Survey>({
+          requestKey: Math.random().toString(),
+        });
+      const studentsResult = await client
+        .collection("users")
+        .getFullList<User>({
+          filter: 'role = "student"',
+          requestKey: Math.random().toString(),
+        });
+
+      setSurveys(surveysResult);
+      setStudents(studentsResult);
+
       // Fetch surveys for participation tracking
-      const surveys = await client.collection("surveys").getFullList<Survey>({
-        filter: clubIds.map((id) => `club_id = "${id}"`).join("||"),
-        sort: "created",
-        requestKey: Math.random().toString(),
-      });
+      const surveysForParticipation = await client
+        .collection("surveys")
+        .getFullList<Survey>({
+          filter: clubIds.map((id) => `club_id = "${id}"`).join("||"),
+          sort: "created",
+          requestKey: Math.random().toString(),
+        });
 
       // Calculate metrics based on selected period
       const periodStart = getPeriodStartDate(period);
@@ -98,9 +119,12 @@ export default function Reports() {
           ? Number((totalBooksRead / currentMembers).toFixed(1))
           : 0;
 
-      const activeParticipants = calculateActiveParticipants(members, surveys);
+      const activeParticipants = calculateActiveParticipants(
+        members,
+        surveysForParticipation,
+      );
       const participationTrend = calculateParticipationTrend(
-        surveys,
+        surveysForParticipation,
         periodStart,
       );
 
@@ -141,63 +165,82 @@ export default function Reports() {
   }, [fetchMetrics, period]);
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
-      {isLoading ? (
-        <StatsLoadingSkeleton />
-      ) : error ? (
-        <ErrorMessage message={error} />
-      ) : (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl w-full font-semibold flex items-center gap-2 text-gray-900">
-              <BarChart2 className="text-blue-500 w-5 h-5" />
-              التقرير السنوي
-            </h2>
-            <div className="flex items-center gap-4">
-              <Select
-                value={period}
-                onValueChange={(e) => setPeriod(e as Period)}
-              >
-                <SelectTrigger>الفترة</SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="year">سنوي</SelectItem>
-                  <SelectItem value="semester">فصلي</SelectItem>
-                  <SelectItem value="month">شهري</SelectItem>
-                </SelectContent>
-              </Select>
-              <button
-                onClick={() => fetchMetrics()}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                title="تحديث البيانات"
-              >
-                <RefreshCw className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            {getStatsConfig(metrics).map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <StatsCard {...stat} />
-              </motion.div>
-            ))}
+    <div className="space-y-6">
+      <Tabs defaultValue="stats" className="w-full">
+        <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0 items-center mb-6">
+          <TabsList>
+            <TabsTrigger value="stats" className="flex items-center gap-2">
+              <BarChart2 className="w-4 h-4" />
+              التقرير العام
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              تحليل الطلاب
+            </TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-4">
+            <Select
+              value={period}
+              onValueChange={(e) => setPeriod(e as Period)}
+            >
+              <SelectTrigger>الفترة</SelectTrigger>
+              <SelectContent>
+                <SelectItem value="year">سنوي</SelectItem>
+                <SelectItem value="semester">فصلي</SelectItem>
+                <SelectItem value="month">شهري</SelectItem>
+              </SelectContent>
+            </Select>
+            <button
+              onClick={() => fetchMetrics()}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              title="تحديث البيانات"
+            >
+              <RefreshCw className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
         </div>
-      )}
 
-      <UpcomingDiscussions />
+        {isLoading ? (
+          <StatsLoadingSkeleton />
+        ) : error ? (
+          <ErrorMessage message={error} />
+        ) : (
+          <>
+            <TabsContent value="stats" className="mt-0">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {getStatsConfig(metrics).map((stat, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <StatsCard {...stat} />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="mt-0">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <StudentAnalytics surveys={surveys} students={students} />
+              </div>
+            </TabsContent>
+          </>
+        )}
+      </Tabs>
     </div>
   );
 }
 
 function StatsLoadingSkeleton() {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div
+      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+      dir={"rtl"}
+    >
       <div className="animate-pulse">
         <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
         <div className="grid sm:grid-cols-2 gap-4">

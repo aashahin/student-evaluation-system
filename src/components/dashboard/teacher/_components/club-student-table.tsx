@@ -62,7 +62,7 @@ const ClubStudentTable = ({
           surveysMap[member.id] = await client
             .collection("surveys")
             .getFullList({
-              filter: `club_id = "${clubId}" && student_id = "${member.id}"`,
+              filter: `club_id = "${clubId}" && student_id = "${member.id}" && type = "self-assessment"`,
               sort: "-created",
               requestKey: Math.random().toString(),
               expand: "student_id",

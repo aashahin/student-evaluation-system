@@ -137,7 +137,7 @@ const BookCard = ({
               </span>
               <span className="inline-flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-4 py-1.5 rounded-full hover:bg-gray-100 transition-colors">
                 <CalendarIcon className="w-4 h-4" />
-                {discussionDate.toLocaleDateString("ar-SA")}
+                {discussionDate.toLocaleDateString("ar")}
               </span>
             </div>
 

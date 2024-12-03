@@ -66,7 +66,7 @@ const MemberTableRow = ({
         {member.age === 0 ? "غير محدد" : member.age}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-        {new Date(member.created).toLocaleDateString("ar-SA")}
+        {new Date(member.created).toLocaleDateString("ar")}
       </td>
       <td className="px-4 sm:px-6 py-4 text-center">
         <SurveysTeacherDetailsDialog

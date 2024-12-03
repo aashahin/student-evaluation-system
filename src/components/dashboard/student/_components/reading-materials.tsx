@@ -11,6 +11,7 @@ import StatsSection, {
   SearchBar,
 } from "@/components/dashboard/student/_components/reading-materials/stats-sections";
 import { toast } from "sonner";
+import { ClientResponseError } from "pocketbase";
 
 export type FilterType = "all" | "read" | "unread";
 
@@ -71,6 +72,30 @@ const ReadingMaterials = () => {
           filter: `student_id = "${studentId}"`,
           expand: "book_id",
         });
+      try {
+        await client
+          .collection("discussions")
+          .getFirstListItem(
+            `student_id = "${studentId}" && book_id = "${bookId}"`,
+            {
+              requestKey: Math.random().toString(),
+            },
+          );
+      } catch (error) {
+        if (error instanceof ClientResponseError) {
+          if (error.status === 404) {
+            const selectedBook = books.find((b) => b.id === bookId);
+            const clubId = selectedBook?.club_id;
+            await client.collection("discussions").create({
+              student_id: studentId,
+              book_id: bookId,
+              club_id: clubId,
+              discussion_date: selectedBook?.discussion_date,
+              attended: false,
+            });
+          }
+        }
+      }
       setReadingStatus(updatedStatus.items);
     } catch (error) {
       toast.error("حدث خطأ أثناء تحديث حالة الكتاب");

@@ -168,7 +168,7 @@ const BookTableRow = ({
             {book.page_count || "غير محدد"}
           </td>
           <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-            {new Date(book.discussion_date).toLocaleDateString("ar-SA")}
+            {new Date(book.discussion_date).toLocaleDateString("ar")}
           </td>
           <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-800">
             <BookEvaluationDetailsDialog book={book} />

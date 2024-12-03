@@ -72,7 +72,7 @@ const ParentEvaluations = () => {
 
     const monthlyProgress = surveys.reduce(
       (acc, survey) => {
-        const month = new Date(survey.created).toLocaleString("ar-SA", {
+        const month = new Date(survey.created).toLocaleString("ar", {
           month: "long",
         });
         const avg =

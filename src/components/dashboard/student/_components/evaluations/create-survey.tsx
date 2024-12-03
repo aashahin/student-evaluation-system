@@ -2,17 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { pb } from "@/lib/api";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Star, AlertCircle } from "lucide-react";
+import { Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -33,9 +33,15 @@ const DiscussionSurveyDialog = ({
 }: DiscussionSurveyDialogProps) => {
   const [open, setOpen] = useState(false);
   const [questions, setQuestions] = useState<string[]>([]);
-  const [answers, setAnswers] = useState<number[]>([]);
+  const [formattedAnswers, setFormattedAnswers] = useState<
+    { question: string; rating: number }[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const client = pb();
+
+  const progress =
+    (formattedAnswers.filter((a) => a.rating > 0).length / questions.length) *
+    100;
 
   useEffect(() => {
     const getQuestions = async () => {
@@ -47,18 +53,32 @@ const DiscussionSurveyDialog = ({
           });
 
         const questionsData = response.value.data || [];
-        setQuestions(questionsData);
-        setAnswers(new Array(questionsData.length).fill(0));
+        if (Array.isArray(questionsData)) {
+          setQuestions(questionsData);
+          const initialAnswers = questionsData.map((question) => ({
+            question,
+            rating: 0,
+          }));
+          setFormattedAnswers(initialAnswers);
+        }
       } catch (error) {
         toast.error("حدث خطأ ما أثناء إستدعاء الأسئلة");
       }
     };
 
-    getQuestions();
-  }, [client]);
+    if (open) {
+      getQuestions();
+    }
+  }, [client, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formattedAnswers.some((answer) => answer.rating === 0)) {
+      toast.error("يرجى الإجابة على جميع الأسئلة");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -67,10 +87,7 @@ const DiscussionSurveyDialog = ({
         student_id: studentId,
         club_id: clubId,
         questions: {
-          data: questions.map((q, i) => ({
-            question: q,
-            rating: answers[i],
-          })),
+          data: formattedAnswers,
         },
       });
       await client.collection("discussions").update(discussionId, {
@@ -88,44 +105,35 @@ const DiscussionSurveyDialog = ({
     }
   };
 
-  const progress =
-    (answers.filter((a) => a > 0).length / questions.length) * 100;
-
   return (
-    <Drawer
-      open={open}
-      onOpenChange={setOpen}
-      snapPoints={[1, 2, 3, 4, 5]}
-      fadeFromIndex={0}
-    >
-      <DrawerTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Star className="w-4 h-4" />
           تقييم النقاش
         </Button>
-      </DrawerTrigger>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl min-h-screen sm:h-[90vh] flex flex-col">
+        <DialogHeader className="relative">
+          <DialogTitle className="text-xl font-bold text-center mb-4">
+            تقييم نقاش الكتاب
+          </DialogTitle>
+          <div className="space-y-2">
+            <Progress value={progress} className="h-2" />
+            <p className="text-muted-foreground text-sm text-center">
+              {progress === 100 ? (
+                <span className="text-green-500">
+                  تم الإجابة على جميع الأسئلة
+                </span>
+              ) : (
+                `تم الإجابة على ${Math.round(progress)}% من الأسئلة`
+              )}
+            </p>
+          </div>
+        </DialogHeader>
 
-      <DrawerContent className="max-h-[90vh]">
-        <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 overflow-y-auto">
-          <DrawerHeader className="sticky top-0 bg-background z-10">
-            <DrawerTitle className="text-xl font-bold text-center mb-4">
-              تقييم نقاش الكتاب
-            </DrawerTitle>
-            <div className="space-y-2">
-              <Progress value={progress} className="h-2" />
-              <p className="text-muted-foreground text-sm text-center">
-                {progress === 100 ? (
-                  <span className="text-green-500">
-                    تم الإجابة على جميع الأسئلة
-                  </span>
-                ) : (
-                  `تم الإجابة على ${Math.round(progress)}% من الأسئلة`
-                )}
-              </p>
-            </div>
-          </DrawerHeader>
-
-          <form onSubmit={handleSubmit} className="space-y-6 pb-8">
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="space-y-6 p-6">
             <AnimatePresence mode="wait">
               {questions.map((question, index) => (
                 <motion.div
@@ -136,7 +144,8 @@ const DiscussionSurveyDialog = ({
                   transition={{ duration: 0.3 }}
                   className={cn(
                     "bg-muted/50 p-6 rounded-lg space-y-4 hover:bg-muted/70 transition-all",
-                    answers[index] > 0 && "border-2 border-primary/20",
+                    formattedAnswers[index]?.rating > 0 &&
+                      "border-2 border-primary/20",
                   )}
                 >
                   <div className="flex items-start gap-3">
@@ -154,7 +163,8 @@ const DiscussionSurveyDialog = ({
                         key={rating}
                         className={cn(
                           "relative group flex flex-col items-center gap-1 cursor-pointer transition-all duration-200 min-w-[50px] p-2 rounded-lg",
-                          answers[index] === rating && "bg-primary/10",
+                          formattedAnswers[index]?.rating === rating &&
+                            "bg-primary/10",
                           "hover:bg-primary/5",
                         )}
                       >
@@ -162,25 +172,29 @@ const DiscussionSurveyDialog = ({
                           type="radio"
                           name={`question-${index}`}
                           value={rating}
-                          checked={answers[index] === rating}
+                          checked={formattedAnswers[index]?.rating === rating}
                           onChange={() => {
-                            const newAnswers = [...answers];
-                            newAnswers[index] = rating;
-                            setAnswers(newAnswers);
+                            const newAnswers = [...formattedAnswers];
+                            newAnswers[index] = {
+                              ...newAnswers[index],
+                              rating: rating,
+                            };
+                            setFormattedAnswers(newAnswers);
                           }}
                           className="sr-only"
                           required
                         />
                         <span
                           className={cn(
-                            "text-2xl transition-transform group-hover:scale-110",
-                            answers[index] === rating && "scale-110",
+                            "text-lg font-semibold transition-transform group-hover:scale-110",
+                            formattedAnswers[index]?.rating === rating &&
+                              "scale-110",
                           )}
                         >
-                          {rating === 0 ? "0" : "⭐".repeat(rating)}
+                          {rating === 0 ? "-" : rating}
                         </span>
                         <span className="text-xs font-medium">
-                          {rating === 0 ? "لا تقييم" : rating}
+                          {rating === 0 ? "لا تقييم" : "تقييم"}
                         </span>
                       </label>
                     ))}
@@ -189,28 +203,21 @@ const DiscussionSurveyDialog = ({
               ))}
             </AnimatePresence>
 
-            <div className="sticky bottom-0 bg-background pt-4 pb-6">
+            <div className="sticky bottom-0 bg-background pt-4">
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading || answers.some((a) => a === 0)}
+                disabled={
+                  isLoading || formattedAnswers.some((a) => a.rating === 0)
+                }
               >
-                {isLoading ? (
-                  "جاري الحفظ..."
-                ) : answers.some((a) => a === 0) ? (
-                  <span className="flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
-                    يرجى الإجابة على جميع الأسئلة
-                  </span>
-                ) : (
-                  "حفظ التقييم"
-                )}
+                {isLoading ? "جاري الحفظ..." : "حفظ التقييم"}
               </Button>
             </div>
           </form>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 };
 

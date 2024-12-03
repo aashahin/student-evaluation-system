@@ -47,7 +47,7 @@ const Evaluations = () => {
       const discussions = await client
         .collection("discussions")
         .getFullList<Discussion>({
-          filter: `student_id = "${studentId}" && attended = true && survey_done = false`,
+          filter: `student_id = "${studentId}" && survey_done = false`,
           sort: "-created",
           requestKey: Math.random().toString(),
           expand: "book_id",
@@ -165,7 +165,7 @@ const Evaluations = () => {
                             تم النقاش في{" "}
                             {new Date(
                               book.expand!.book_id!.discussion_date,
-                            ).toLocaleDateString("ar-SA")}
+                            ).toLocaleDateString("ar")}
                           </span>
                         </div>
                       </div>

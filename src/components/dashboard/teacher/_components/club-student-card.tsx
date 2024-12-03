@@ -170,7 +170,7 @@ const ClubStudentCard = ({
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <span className="bg-gray-50 px-4 py-2 rounded-full">
             تم الإنشاء:{" "}
-            {new Date(selectedClub.created).toLocaleDateString("ar-SA")}
+            {new Date(selectedClub.created).toLocaleDateString("ar")}
           </span>
         </div>
       </div>

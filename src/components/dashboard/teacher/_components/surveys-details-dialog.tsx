@@ -126,7 +126,7 @@ const SurveysTeacherDetailsDialog = ({
                   {memberSurveys[member.id]?.[0]
                     ? new Date(
                         memberSurveys[member.id][0].created,
-                      ).toLocaleDateString("ar-SA")
+                      ).toLocaleDateString("ar")
                     : "لا يوجد"}
                 </span>
               </div>
@@ -163,7 +163,7 @@ const SurveysTeacherDetailsDialog = ({
                       <div className="flex items-center gap-4">
                         <div className="text-sm text-gray-600 flex items-center gap-2">
                           <CalendarIcon className="w-4 h-4" />
-                          {new Date(survey.created).toLocaleDateString("ar-SA")}
+                          {new Date(survey.created).toLocaleDateString("ar")}
                         </div>
                         <div
                           className={`px-3 py-1 rounded-full text-sm font-medium border ${getRatingColor(avgRating)}`}

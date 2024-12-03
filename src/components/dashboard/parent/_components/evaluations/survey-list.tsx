@@ -8,16 +8,12 @@ type SurveyListProps = {
   surveys: Survey[];
 };
 
-export const SurveyList = ({
-  surveys = [],
-}: SurveyListProps) => {
+export const SurveyList = ({ surveys = [] }: SurveyListProps) => {
   if (surveys.length === 0) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <p className="text-gray-500 mb-2">
-            لا يوجد تقييمات
-          </p>
+          <p className="text-gray-500 mb-2">لا يوجد تقييمات</p>
         </CardContent>
       </Card>
     );
@@ -57,7 +53,7 @@ export const SurveyList = ({
                 <div className="flex items-center gap-4 justify-between">
                   <span className="flex items-center gap-2 text-sm text-gray-500">
                     <CalendarIcon className="h-4 w-4" />
-                    {new Date(survey.created).toLocaleDateString("ar-SA")}
+                    {new Date(survey.created).toLocaleDateString("ar")}
                   </span>
                 </div>
               </div>

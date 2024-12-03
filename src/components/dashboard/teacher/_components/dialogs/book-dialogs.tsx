@@ -21,7 +21,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 
-interface BookAttendanceDialogProps {
+type BookAttendanceDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedBook: Book | null;
@@ -33,7 +33,7 @@ interface BookAttendanceDialogProps {
   clubMembers?: User[];
   onToggleAttendance: (studentId: string, bookId: string) => Promise<void>;
   isStudentAttended: (studentId: string) => boolean;
-}
+};
 
 export const BookAttendanceDialog = ({
   open,
@@ -58,7 +58,7 @@ export const BookAttendanceDialog = ({
           <p className="text-sm text-gray-500 mt-2">
             تاريخ المناقشة:{" "}
             {selectedBook?.discussion_date &&
-              new Date(selectedBook.discussion_date).toLocaleDateString("ar-SA")}
+              new Date(selectedBook.discussion_date).toLocaleDateString("ar")}
           </p>
         </DialogHeader>
 
@@ -116,8 +116,9 @@ export const BookAttendanceDialog = ({
 
             <div className="flex justify-between items-center pt-4 border-t">
               <p className="text-sm text-gray-500">
-                إجمالي الحضور: {attendanceRecords.filter((r) => r.attended).length}{" "}
-                من {clubMembers?.length}
+                إجمالي الحضور:{" "}
+                {attendanceRecords.filter((r) => r.attended).length} من{" "}
+                {clubMembers?.length}
               </p>
               <Button onClick={() => onOpenChange(false)}>إغلاق</Button>
             </div>
@@ -128,11 +129,11 @@ export const BookAttendanceDialog = ({
   );
 };
 
-interface DeleteBookDialogProps {
+type DeleteBookDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => Promise<void>;
-}
+};
 
 export const DeleteBookDialog = ({
   open,

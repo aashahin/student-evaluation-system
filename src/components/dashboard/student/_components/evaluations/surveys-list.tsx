@@ -71,7 +71,7 @@ const SurveysList = ({
                     </div>
                     <div className="text-sm text-gray-600 flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4" />
-                      {new Date(survey.created).toLocaleDateString("ar-SA")}
+                      {new Date(survey.created).toLocaleDateString("ar")}
                     </div>
                   </div>
 
