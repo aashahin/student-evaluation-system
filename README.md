@@ -17,7 +17,7 @@
 - Typescript
 - Bun as NPM
 - React 19
-- NextJs 15 (With new React Compiler)
+- NextJs 15 with new react compiler and PPR
 - Tailwind CSS
 - Shadcn UI
 - Framer Motion
